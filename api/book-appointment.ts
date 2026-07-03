@@ -15,10 +15,10 @@ const BOOKING_TZID = "America/New_York";
 const BOOKING_DURATION_MINUTES = 60;
 
 const VALID_SERVICES = [
-  "Deck Refloor (new boards)",
-  "Deck Facelift (boards + railings)",
-  "Custom / New Deck",
-  "Not sure — need an expert look",
+  "New deck boards only",
+  "New boards + new railings",
+  "A brand-new deck",
+  "Not sure — I'd like an expert to look",
 ];
 
 // Server-side availability rules — must match src/lib the contact page uses.

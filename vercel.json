@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    { "source": "/services/deck-refloor", "destination": "/services/deck-resurfacing", "permanent": true },
+    { "source": "/services/deck-facelift", "destination": "/services/deck-resurfacing", "permanent": true },
+    { "source": "/services/custom-decks", "destination": "/services/new-deck-builds", "permanent": true },
+    { "source": "/portfolio", "destination": "/our-work", "permanent": true },
+    { "source": "/contact", "destination": "/estimate", "permanent": true }
+  ]
+}

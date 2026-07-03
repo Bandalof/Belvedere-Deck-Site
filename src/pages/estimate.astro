@@ -3,18 +3,18 @@ import Layout from '../layouts/Layout.astro';
 import { brand } from '../config/brand';
 ---
 <Layout
-  title="Book a Consultation | Belvedere Decks — Live Calendar"
-  description="Book your deck consultation online — see live appointment availability in Montgomery County, MD, or call for an honest price range first."
+  title="Get a Free Estimate | Belvedere Decks — Book Online"
+  description="Get a free deck estimate in Maryland. Call for an honest price range, or book your visit online — live calendar, exact price at your kitchen table the same visit."
 >
   <section class="hero">
     <div class="container">
-      <p class="eyebrow">Contact / Book</p>
+      <p class="eyebrow">Get a Free Estimate</p>
       <h1>Pick a time. We'll bring the answers.</h1>
       <div class="rule"></div>
       <p class="lead">
-        Prefer to talk first? Call or text and we'll give you an honest price range on the
-        phone. Rather skip the phone? Book directly below — the calendar shows live
-        availability, and the project details help us arrive prepared.
+        Prefer to talk first? Call or text and we'll give you an honest price range on
+        the phone. Rather skip the phone? Book below — the calendar shows live openings,
+        and your project details help us arrive prepared.
       </p>
     </div>
   </section>
@@ -29,25 +29,25 @@ import { brand } from '../config/brand';
             <strong>Email:</strong> <a href={`mailto:${brand.email}`}>{brand.email}</a>
           </p>
           <p>
-            We respond to every inquiry the same day — usually within the hour. If we're on
-            a job site, you'll get a text back within minutes.
+            We respond to every inquiry the same day — usually within the hour. If we're
+            on a job site, you'll get a text back within minutes.
           </p>
           <div class="notice">
             <strong>What the visit looks like:</strong> about an hour. We walk the deck
-            together and narrate what we find, measure everything, and build your exact
-            price on the iPad in front of you — three options, same visit. It works best
-            when everyone who weighs in on the decision can be there.
+            together and tell you what we find, good and bad. Then we measure and build
+            your exact price on the iPad in front of you — three options, same visit. It
+            works best when everyone who weighs in on the decision can be there.
           </div>
           <div class="notice">
-            <strong>Why we ask for project details:</strong> the description you give is
-            how we show up prepared — the right board samples, the right questions, and a
-            realistic range before we ring the doorbell. Bookings without real details
-            get a confirmation call first.
+            <strong>Good to know:</strong> our projects start at $5,000 — we don't take
+            on small repairs. And the details you give below are how we show up
+            prepared: the right board samples, the right questions, and a realistic
+            range before we ring the doorbell.
           </div>
         </div>
 
         <div class="booking">
-          <h2 style="margin-top: 0;">Book your consultation</h2>
+          <h2 style="margin-top: 0;">Book your free estimate</h2>
           <div class="cal-head">
             <button type="button" id="prev-month" aria-label="Previous month">‹</button>
             <span class="month" id="month-label"></span>
@@ -72,22 +72,22 @@ import { brand } from '../config/brand';
             </div>
             <div>
               <label for="address">Project address *</label>
-              <input id="address" name="address" type="text" required autocomplete="street-address" placeholder="Street, town — so we can check permits & travel" />
+              <input id="address" name="address" type="text" required autocomplete="street-address" placeholder="Street and town" />
             </div>
             <div>
               <label for="service">What does the deck need? *</label>
               <select id="service" name="service" required>
                 <option value="" disabled selected>Choose one…</option>
-                <option>Deck Refloor (new boards)</option>
-                <option>Deck Facelift (boards + railings)</option>
-                <option>Custom / New Deck</option>
-                <option>Not sure — need an expert look</option>
+                <option>New deck boards only</option>
+                <option>New boards + new railings</option>
+                <option>A brand-new deck</option>
+                <option>Not sure — I'd like an expert to look</option>
               </select>
             </div>
             <div>
               <label for="description">Tell us about the project *</label>
               <textarea id="description" name="description" rows="4" required minlength="20"
-                placeholder="Rough size, age of the deck, what's bothering you about it, and what you're hoping for. A photo-worthy description helps us arrive with the right samples."></textarea>
+                placeholder="Rough size, age of the deck, what's bothering you about it, and what you're hoping for."></textarea>
             </div>
             <button class="btn primary" type="submit" id="submit-btn" disabled>Pick a date &amp; time above</button>
             <div class="form-msg" id="form-msg"></div>
@@ -103,7 +103,7 @@ import { brand } from '../config/brand';
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const DOWS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
-    let viewYear: number, viewMonth: number; // month: 0-11
+    let viewYear: number, viewMonth: number;
     let selectedDateKey: string | null = null;
     let selectedTime: string | null = null;
     let booked: Record<string, string[]> = {};

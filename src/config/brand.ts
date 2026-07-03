@@ -9,13 +9,13 @@ export const brand = {
   launched: false,               // flip to true on Day L only
   name: 'Belvedere Decks',
   legalName: 'Belvedere Decks LLC',   // pending SDAT amendment
-  tagline: 'Composite deck specialists — Montgomery County, Maryland',
+  tagline: 'Composite deck specialists — serving Maryland, based in Montgomery County',
   mhic: '',                      // MHIC #_____ — fill on Day L
   phone: '',                     // business line — pending setup
   phoneDisplay: '(240) 555-0000', // TODO replace with real business line
   email: 'hello@belvederedecks.com', // TODO confirm after domain + M365
   domain: 'https://www.belvederedecks.com',
   formEndpoint: '',              // TODO: Formspree/serverless endpoint before launch
-  serviceArea: 'Montgomery County, MD',
-  minimumJob: 8000,
+  serviceArea: 'Maryland — based in Montgomery County',
+  minimumJob: 5000,
 };

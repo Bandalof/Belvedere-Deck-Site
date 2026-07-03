@@ -225,3 +225,32 @@ footer.page-footer a { color: rgba(245,242,238,0.7); }
 .form-msg { padding: 14px 16px; border-radius: var(--radius); font-size: 0.95rem; margin-top: 8px; display: none; }
 .form-msg.ok { display: block; background: #eef5ec; border-left: 3px solid #4c7a45; }
 .form-msg.err { display: block; background: #faeeee; border-left: 3px solid #a13d3d; }
+
+/* ---------- audit implementation additions ---------- */
+.side-phone {
+  display: flex; align-items: center; gap: 8px; margin-top: 12px;
+  color: var(--accent); text-decoration: none; font-size: 0.95rem; font-weight: 500;
+}
+.side-phone svg { width: 16px; height: 16px; }
+.side-cta { padding: 16px; border-top: 1px solid var(--sidebar-border); }
+.close-btn {
+  display: none; position: absolute; top: 12px; right: 12px;
+  background: none; border: none; color: var(--sidebar-fg); font-size: 1.2rem;
+  cursor: pointer; padding: 8px; z-index: 51;
+}
+@media (max-width: 1023.9px) { .close-btn { display: block; } }
+header.mobile .header-phone { display: flex; align-items: center; color: var(--accent-dark); padding: 8px; }
+
+/* stack tables on phones so columns never squeeze */
+@media (max-width: 640px) {
+  table.stack, table.stack tbody, table.stack tr, table.stack td, table.stack th { display: block; width: 100% !important; }
+  table.stack thead { display: none; }
+  table.stack tr { border-bottom: 2px solid var(--border); padding: 8px 0; }
+  table.stack th { border-bottom: none; padding-bottom: 2px; white-space: normal; }
+  table.stack td { border-bottom: none; padding-top: 2px; }
+  th { white-space: normal; }
+  table.compare td::before { content: attr(data-label); display: block; font-family: var(--serif); font-weight: 600; color: var(--primary); margin-bottom: 2px; }
+  table.compare, table.compare tbody, table.compare tr, table.compare td { display: block; width: 100% !important; }
+  table.compare thead { display: none; }
+  table.compare tr { border-bottom: 2px solid var(--border); padding: 8px 0; }
+}
