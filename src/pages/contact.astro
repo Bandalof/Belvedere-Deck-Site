@@ -3,78 +3,265 @@ import Layout from '../layouts/Layout.astro';
 import { brand } from '../config/brand';
 ---
 <Layout
-  title="Contact | Belvedere Decks — Get Your Exact Deck Price"
-  description="Contact Belvedere Decks in Montgomery County, MD. Honest phone range first, exact price at your kitchen table the same visit."
+  title="Book a Consultation | Belvedere Decks — Live Calendar"
+  description="Book your deck consultation online — see live appointment availability in Montgomery County, MD, or call for an honest price range first."
 >
   <section class="hero">
     <div class="container">
-      <p class="eyebrow">Contact</p>
-      <h1>Start with a straight answer.</h1>
+      <p class="eyebrow">Contact / Book</p>
+      <h1>Pick a time. We'll bring the answers.</h1>
       <div class="rule"></div>
       <p class="lead">
-        Tell us about the deck and we'll give you an honest price range on the phone —
-        before anyone drives to your house. Text 3–4 photos (one from the yard, one
-        underneath if you can) and we'll come prepared.
+        Prefer to talk first? Call or text and we'll give you an honest price range on the
+        phone. Rather skip the phone? Book directly below — the calendar shows live
+        availability, and the project details help us arrive prepared.
       </p>
     </div>
   </section>
 
   <section class="section">
     <div class="container">
-      <div class="grid cols-2">
+      <div class="grid cols-2" style="align-items: start;">
         <div>
-          <h2>Reach us directly</h2>
+          <h2 style="margin-top: 0;">Reach us directly</h2>
           <p>
             <strong>Call or text:</strong> <a href={`tel:${brand.phone || brand.phoneDisplay}`}>{brand.phoneDisplay}</a><br />
             <strong>Email:</strong> <a href={`mailto:${brand.email}`}>{brand.email}</a>
           </p>
           <p>
-            We respond to every inquiry the same day — usually within the hour. If we're
-            on a job site, you'll get a text back within minutes and a call as soon as
-            we're off the ladder.
+            We respond to every inquiry the same day — usually within the hour. If we're on
+            a job site, you'll get a text back within minutes.
           </p>
           <div class="notice">
-            <strong>What happens next:</strong> a short phone conversation about the deck
-            and your range, then one visit where we inspect, measure, and build your exact
-            price on the iPad in front of you. About an hour, and it works best when
-            everyone who weighs in can be there.
+            <strong>What the visit looks like:</strong> about an hour. We walk the deck
+            together and narrate what we find, measure everything, and build your exact
+            price on the iPad in front of you — three options, same visit. It works best
+            when everyone who weighs in on the decision can be there.
+          </div>
+          <div class="notice">
+            <strong>Why we ask for project details:</strong> the description you give is
+            how we show up prepared — the right board samples, the right questions, and a
+            realistic range before we ring the doorbell. Bookings without real details
+            get a confirmation call first.
           </div>
         </div>
-        <div>
-          <h2>Or send the details</h2>
-          <!-- TODO before launch: set brand.formEndpoint (Formspree or serverless
-               function) and TEST an end-to-end submission. Do not launch with a
-               dead form — audit item. -->
-          <form class="contact" method="POST" action={brand.formEndpoint || '#'}>
+
+        <div class="booking">
+          <h2 style="margin-top: 0;">Book your consultation</h2>
+          <div class="cal-head">
+            <button type="button" id="prev-month" aria-label="Previous month">‹</button>
+            <span class="month" id="month-label"></span>
+            <button type="button" id="next-month" aria-label="Next month">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <p class="hint">Weekdays 9 AM–4 PM · Saturdays 9 AM–12 PM · Times shown are open right now.</p>
+          <div class="slots" id="slots"></div>
+
+          <form id="booking-form" class="contact" style="margin-top: 20px;">
             <div>
-              <label for="name">Name</label>
-              <input id="name" name="name" type="text" required />
+              <label for="name">Name *</label>
+              <input id="name" name="name" type="text" required autocomplete="name" />
             </div>
             <div>
-              <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="tel" required />
+              <label for="phone">Phone *</label>
+              <input id="phone" name="phone" type="tel" required autocomplete="tel" />
             </div>
             <div>
-              <label for="town">Town</label>
-              <input id="town" name="town" type="text" placeholder="e.g., Olney" />
+              <label for="email">Email *</label>
+              <input id="email" name="email" type="email" required autocomplete="email" />
             </div>
             <div>
-              <label for="service">What does the deck need?</label>
-              <select id="service" name="service">
-                <option>Not sure — that's your job</option>
-                <option>New boards (Refloor)</option>
-                <option>Boards + railings (Facelift)</option>
-                <option>A brand-new custom deck</option>
+              <label for="address">Project address *</label>
+              <input id="address" name="address" type="text" required autocomplete="street-address" placeholder="Street, town — so we can check permits & travel" />
+            </div>
+            <div>
+              <label for="service">What does the deck need? *</label>
+              <select id="service" name="service" required>
+                <option value="" disabled selected>Choose one…</option>
+                <option>Deck Refloor (new boards)</option>
+                <option>Deck Facelift (boards + railings)</option>
+                <option>Custom / New Deck</option>
+                <option>Not sure — need an expert look</option>
               </select>
             </div>
             <div>
-              <label for="message">Anything else we should know?</label>
-              <textarea id="message" name="message" rows="4"></textarea>
+              <label for="description">Tell us about the project *</label>
+              <textarea id="description" name="description" rows="4" required minlength="20"
+                placeholder="Rough size, age of the deck, what's bothering you about it, and what you're hoping for. A photo-worthy description helps us arrive with the right samples."></textarea>
             </div>
-            <button class="btn primary" type="submit">Send it</button>
+            <button class="btn primary" type="submit" id="submit-btn" disabled>Pick a date &amp; time above</button>
+            <div class="form-msg" id="form-msg"></div>
           </form>
         </div>
       </div>
     </div>
   </section>
+
+  <script>
+    const WEEKDAY_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM'];
+    const SATURDAY_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM'];
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DOWS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+    let viewYear: number, viewMonth: number; // month: 0-11
+    let selectedDateKey: string | null = null;
+    let selectedTime: string | null = null;
+    let booked: Record<string, string[]> = {};
+
+    const grid = document.getElementById('cal-grid')!;
+    const slotsEl = document.getElementById('slots')!;
+    const monthLabel = document.getElementById('month-label')!;
+    const form = document.getElementById('booking-form') as HTMLFormElement;
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+    const msg = document.getElementById('form-msg')!;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    viewYear = today.getFullYear();
+    viewMonth = today.getMonth();
+
+    function key(y: number, m: number, d: number) {
+      return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+    function baseSlots(dateKey: string): string[] {
+      const day = new Date(dateKey + 'T12:00:00').getDay();
+      if (day === 0) return [];
+      if (day === 6) return SATURDAY_SLOTS;
+      return WEEKDAY_SLOTS;
+    }
+    function openSlots(dateKey: string): string[] {
+      const taken = booked[dateKey] || [];
+      return baseSlots(dateKey).filter((s) => !taken.includes(s));
+    }
+
+    async function fetchMonth(y: number, m: number) {
+      try {
+        const res = await fetch(`/api/bookings?month=${y}-${String(m + 1).padStart(2, '0')}`);
+        if (res.ok) booked = { ...booked, ...(await res.json()) };
+      } catch { /* calendar still works with base availability */ }
+    }
+
+    function renderCalendar() {
+      monthLabel.textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+      grid.innerHTML = '';
+      DOWS.forEach((d) => {
+        const el = document.createElement('div');
+        el.className = 'dow';
+        el.textContent = d;
+        grid.appendChild(el);
+      });
+      const first = new Date(viewYear, viewMonth, 1);
+      for (let i = 0; i < first.getDay(); i++) grid.appendChild(document.createElement('div'));
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'day';
+        btn.textContent = String(d);
+        const dk = key(viewYear, viewMonth, d);
+        const dateObj = new Date(viewYear, viewMonth, d);
+        const past = dateObj < today;
+        const noSlots = openSlots(dk).length === 0;
+        if (past || noSlots) {
+          btn.disabled = true;
+          if (!past && noSlots && baseSlots(dk).length > 0) btn.classList.add('full');
+        }
+        if (dk === selectedDateKey) btn.classList.add('selected');
+        btn.addEventListener('click', () => {
+          selectedDateKey = dk;
+          selectedTime = null;
+          renderCalendar();
+          renderSlots();
+          updateSubmit();
+        });
+        grid.appendChild(btn);
+      }
+      const prev = document.getElementById('prev-month') as HTMLButtonElement;
+      prev.disabled = viewYear === today.getFullYear() && viewMonth === today.getMonth();
+    }
+
+    function renderSlots() {
+      slotsEl.innerHTML = '';
+      if (!selectedDateKey) return;
+      openSlots(selectedDateKey).forEach((slot) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = slot;
+        if (slot === selectedTime) b.classList.add('selected');
+        b.addEventListener('click', () => {
+          selectedTime = slot;
+          renderSlots();
+          updateSubmit();
+        });
+        slotsEl.appendChild(b);
+      });
+    }
+
+    function updateSubmit() {
+      if (selectedDateKey && selectedTime) {
+        submitBtn.disabled = false;
+        const d = new Date(selectedDateKey + 'T12:00:00');
+        submitBtn.textContent = `Book ${MONTHS[d.getMonth()]} ${d.getDate()} at ${selectedTime}`;
+      } else {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Pick a date & time above';
+      }
+    }
+
+    function show(kind: 'ok' | 'err', text: string) {
+      msg.className = `form-msg ${kind}`;
+      msg.textContent = text;
+    }
+
+    document.getElementById('prev-month')!.addEventListener('click', async () => {
+      viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+      await fetchMonth(viewYear, viewMonth); renderCalendar(); renderSlots();
+    });
+    document.getElementById('next-month')!.addEventListener('click', async () => {
+      viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+      await fetchMonth(viewYear, viewMonth); renderCalendar(); renderSlots();
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity() || !selectedDateKey || !selectedTime) return;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Booking…';
+      const d = new Date(selectedDateKey + 'T12:00:00');
+      const human = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      const data = new FormData(form);
+      try {
+        const res = await fetch('/api/book-appointment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: data.get('name'), email: data.get('email'), phone: data.get('phone'),
+            address: data.get('address'), service: data.get('service'),
+            description: data.get('description'),
+            date: human, time: selectedTime, dateKey: selectedDateKey,
+          }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (res.ok) {
+          (booked[selectedDateKey] ||= []).push(selectedTime);
+          show('ok', `You're booked for ${human} at ${selectedTime}. Check your email for the calendar invite — we'll confirm by phone within 24 hours.`);
+          form.reset();
+          selectedDateKey = null; selectedTime = null;
+          renderCalendar(); renderSlots(); updateSubmit();
+        } else if (res.status === 409) {
+          show('err', body.error || 'That time was just taken — please pick another slot.');
+          await fetchMonth(viewYear, viewMonth);
+          renderSlots(); renderCalendar(); updateSubmit();
+        } else {
+          show('err', body.error || 'Something went wrong. Please try again or call us directly.');
+          updateSubmit();
+        }
+      } catch {
+        show('err', 'Something went wrong. Please try again or call us directly.');
+        updateSubmit();
+      }
+    });
+
+    fetchMonth(viewYear, viewMonth).then(() => { renderCalendar(); renderSlots(); updateSubmit(); });
+  </script>
 </Layout>

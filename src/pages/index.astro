@@ -3,22 +3,52 @@ import Layout from '../layouts/Layout.astro';
 ---
 <Layout
   title="Belvedere Decks | Composite Deck Builder in Montgomery County, MD"
-  description="Montgomery County's straight-answer deck company. Premium TimberTech and Trex decks with published pricing, an exact price at your kitchen table the same visit, and a 10-year workmanship warranty."
+  description="Montgomery County's straight-answer deck company. Premium TimberTech and Trex composite decks with published pricing, an exact price at your kitchen table the same visit, and a 10-year workmanship warranty."
 >
-  <section class="hero">
-    <div class="container">
+  <!-- HERO — full-height charcoal, matching the BOL homepage structure -->
+  <section class="hero" style="min-height: calc(100vh - 64px); display: flex; flex-direction: column; padding: 0;">
+    <div class="container" style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 64px; padding-bottom: 64px;">
       <p class="eyebrow">Montgomery County, Maryland</p>
-      <h1>Your exact deck price, at your kitchen table, the same visit.</h1>
-      <div class="rule"></div>
-      <p class="lead">
+      <h2 style="font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--accent); margin: 0 0 12px; font-weight: 300; letter-spacing: 0.02em;">
+        Belvedere Decks
+      </h2>
+      <h1 style="font-size: clamp(2.5rem, 6vw, 3.75rem); margin-bottom: 1.5rem;">
+        Your exact deck price,<br />same visit.
+      </h1>
+      <p class="lead" style="margin-bottom: 2.5rem;">
         Most deck companies make you wait a week for a number. We measure your deck,
         build your estimate on the iPad in front of you, and hand you an exact price
         before we leave — with three options and nothing hidden.
       </p>
-      <p style="margin-top: 28px;">
-        <a class="btn primary" href="/contact">Get your exact price</a>
-        &nbsp; <a class="btn ghost" href="/pricing">See what decks really cost</a>
-      </p>
+      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <a class="btn primary" href="/contact" style="padding: 16px 32px;">Book Your Consultation</a>
+        <a class="btn ghost" href="/pricing" style="padding: 16px 32px;">See What Decks Really Cost</a>
+      </div>
+    </div>
+    <div class="trust-bar">
+      <div class="container">
+        <p>TimberTech &amp; Trex Installer · 10-Year Workmanship Warranty · MCDPS Permit Fluency · Serving Montgomery County</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROOF BAR -->
+  <section class="proof-bar">
+    <div class="container">
+      <div class="cells">
+        <div>
+          <p class="big">Published Pricing</p>
+          <p class="label">The county's only real numbers</p>
+        </div>
+        <div>
+          <p class="big">Same-Visit Price</p>
+          <p class="label">Exact, on the iPad, in your kitchen</p>
+        </div>
+        <div>
+          <p class="big">10-Year Warranty</p>
+          <p class="label">Workmanship, in writing</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -81,13 +111,13 @@ import Layout from '../layouts/Layout.astro';
       <h2>From first call to finished deck.</h2>
       <table>
         <tbody>
-          <tr><th>1. Call or write</th><td>Tell us about the deck. We'll give you an honest price range on the phone — most companies won't.</td></tr>
+          <tr><th>1. Call or book</th><td>Tell us about the deck — by phone, or pick an appointment time right on the <a href="/contact">calendar</a>. Either way you'll get an honest price range up front.</td></tr>
           <tr><th>2. The visit</th><td>We walk the deck together and narrate what we find, good and bad: post condition, ledger flashing, joist spacing, railing safety. Then we measure and build your actual price on the iPad while you watch.</td></tr>
           <tr><th>3. Three options</th><td>Good, better, and best — same code-perfect structure under every tier. We never tier the safety.</td></tr>
           <tr><th>4. The build</th><td>Permits and inspections handled where required, a clean site every night, and a final walkthrough on your finished deck.</td></tr>
         </tbody>
       </table>
-      <p style="margin-top: 20px;"><a class="btn primary" href="/contact">Start with a conversation</a></p>
+      <p style="margin-top: 20px;"><a class="btn primary" href="/contact">Book your consultation</a></p>
     </div>
   </section>
 
