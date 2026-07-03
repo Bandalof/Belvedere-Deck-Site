@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
 
 // Ported from Band Outdoor Living's send-estimate.ts, with two changes:
-// 1. The slot is INSERTed (reserved) BEFORE emails send — a conflict returns 409
+// 1. The slot is INSERTed (reserved) BEFORE emails send - a conflict returns 409
 //    so two visitors can never book the same hour.
 // 2. Job-detail fields (service line + description) are required and validated
 //    server-side so no appointment lands without scope information.
@@ -18,10 +18,10 @@ const VALID_SERVICES = [
   "New deck boards only",
   "New boards + new railings",
   "A brand-new deck",
-  "Not sure — I'd like an expert to look",
+  "Not sure, I'd like an expert to look",
 ];
 
-// Server-side availability rules — must match src/lib the contact page uses.
+// Server-side availability rules - must match src/lib the contact page uses.
 const WEEKDAY_SLOTS = ["9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM"];
 const SATURDAY_SLOTS = ["9:00 AM","10:00 AM","11:00 AM","12:00 PM"];
 
@@ -136,7 +136,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const dateKey = sanitize(req.body?.dateKey); // YYYY-MM-DD
   const description = sanitize(req.body?.description);
 
-  // Hard requirements — the job details are the point.
+  // Hard requirements - the job details are the point.
   if (!name || !email || !phone || !address || !service || !date || !time || !dateKey || !description) {
     return res.status(400).json({ error: "All fields are required, including the project details." });
   }
@@ -157,7 +157,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const fullDescription = `Service: ${service}\n${description}`;
 
-  // 1. Reserve the slot FIRST — the unique constraint is the lock.
+  // 1. Reserve the slot FIRST - the unique constraint is the lock.
   try {
     const sql = neon(process.env.DATABASE_URL!);
     const inserted = await sql`
@@ -173,7 +173,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "Could not save the booking. Please try again or call us." });
   }
 
-  // 2. Emails + calendar invite (best-effort — the slot is already saved).
+  // 2. Emails + calendar invite (best-effort - the slot is already saved).
   const parsedTime = parse12hTime(time);
   const dateMatch = dateKey.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   let icsContent: string | null = null;
@@ -182,7 +182,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       uid: `${dateKey}-${String(parsedTime.hours).padStart(2, "0")}${String(parsedTime.minutes).padStart(2, "0")}@belvederedecks.com`,
       startLocal: { year: +dateMatch[1], month: +dateMatch[2], day: +dateMatch[3], hours: parsedTime.hours, minutes: parsedTime.minutes },
       durationMinutes: BOOKING_DURATION_MINUTES,
-      summary: `Deck consultation — ${name}`,
+      summary: `Deck consultation: ${name}`,
       location: address,
       description: `Customer: ${name}\nEmail: ${email}\nPhone: ${phone}\n\n${fullDescription}`,
       organizerName: "Belvedere Decks",
@@ -217,7 +217,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const customerHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #1c1c1c; border-bottom: 2px solid #b8965a; padding-bottom: 8px;">You're booked, ${escapeHtml(name)}.</h2>
-      <p style="color: #1c1c1c;">Your deck consultation is scheduled — we'll confirm by phone within 24 hours.</p>
+      <p style="color: #1c1c1c;">Your deck consultation is scheduled. We'll confirm by phone within 24 hours.</p>
       <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
         ${row("Date & Time", `${escapeHtml(date)} at ${escapeHtml(time)}`)}
         ${row("Address", escapeHtml(address), true)}
@@ -225,7 +225,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       </table>
       <p style="margin-top: 16px; color: #1c1c1c;">
         Plan on about an hour, and it works best when everyone who weighs in on the decision can be there.
-        We'll walk the deck together, measure, and build your exact price in front of you — same visit.
+        We'll walk the deck together, measure, and build your exact price in front of you, same visit.
       </p>
       <p style="margin-top: 8px; font-size: 13px; color: #555;">Need to reschedule? Just reply to this email or call us.</p>
     </div>`;
@@ -239,14 +239,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await resend.emails.send({
       from: MAIL_FROM,
       to: OWNER_EMAIL,
-      subject: `Booking: ${name} — ${date} ${time} (${service})`,
+      subject: `Booking: ${name}, ${date} ${time} (${service})`,
       html: ownerHtml,
       attachments,
     });
     await resend.emails.send({
       from: MAIL_FROM,
       to: email,
-      subject: `Your deck consultation — ${date} at ${time}`,
+      subject: `Your deck consultation: ${date} at ${time}`,
       html: customerHtml,
       attachments,
     });

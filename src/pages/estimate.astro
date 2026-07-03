@@ -3,8 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import { brand } from '../config/brand';
 ---
 <Layout
-  title="Get a Free Estimate | Belvedere Decks — Book Online"
-  description="Get a free deck estimate in Maryland. Call for an honest price range, or book your visit online — live calendar, exact price at your kitchen table the same visit."
+  title="Get a Free Estimate | Belvedere Decks | Book Online"
+  description="Get a free deck estimate in Maryland. Call for an honest price range, or book your visit online: live calendar, exact price at your kitchen table the same visit."
 >
   <section class="hero">
     <div class="container">
@@ -13,7 +13,7 @@ import { brand } from '../config/brand';
       <div class="rule"></div>
       <p class="lead">
         Prefer to talk first? Call or text and we'll give you an honest price range on
-        the phone. Rather skip the phone? Book below — the calendar shows live openings,
+        the phone. Rather skip the phone? Book below. The calendar shows live openings,
         and your project details help us arrive prepared.
       </p>
     </div>
@@ -29,17 +29,17 @@ import { brand } from '../config/brand';
             <strong>Email:</strong> <a href={`mailto:${brand.email}`}>{brand.email}</a>
           </p>
           <p>
-            We respond to every inquiry the same day — usually within the hour. If we're
+            We respond to every inquiry the same day, usually within the hour. If we're
             on a job site, you'll get a text back within minutes.
           </p>
           <div class="notice">
             <strong>What the visit looks like:</strong> about an hour. We walk the deck
             together and tell you what we find, good and bad. Then we measure and build
-            your exact price on the iPad in front of you — three options, same visit. It
+            your exact price on the iPad in front of you: three options, same visit. It
             works best when everyone who weighs in on the decision can be there.
           </div>
           <div class="notice">
-            <strong>Good to know:</strong> our projects start at $5,000 — we don't take
+            <strong>Good to know:</strong> our projects start at $5,000. We don't take
             on small repairs. And the details you give below are how we show up
             prepared: the right board samples, the right questions, and a realistic
             range before we ring the doorbell.
@@ -81,7 +81,7 @@ import { brand } from '../config/brand';
                 <option>New deck boards only</option>
                 <option>New boards + new railings</option>
                 <option>A brand-new deck</option>
-                <option>Not sure — I'd like an expert to look</option>
+                <option>Not sure, I'd like an expert to look</option>
               </select>
             </div>
             <div>
@@ -244,12 +244,12 @@ import { brand } from '../config/brand';
         const body = await res.json().catch(() => ({}));
         if (res.ok) {
           (booked[selectedDateKey] ||= []).push(selectedTime);
-          show('ok', `You're booked for ${human} at ${selectedTime}. Check your email for the calendar invite — we'll confirm by phone within 24 hours.`);
+          show('ok', `You're booked for ${human} at ${selectedTime}. Check your email for the calendar invite. We'll confirm by phone within 24 hours.`);
           form.reset();
           selectedDateKey = null; selectedTime = null;
           renderCalendar(); renderSlots(); updateSubmit();
         } else if (res.status === 409) {
-          show('err', body.error || 'That time was just taken — please pick another slot.');
+          show('err', body.error || 'That time was just taken. Please pick another slot.');
           await fetchMonth(viewYear, viewMonth);
           renderSlots(); renderCalendar(); updateSubmit();
         } else {

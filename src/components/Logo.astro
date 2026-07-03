@@ -1,0 +1,62 @@
+---
+// Belvedere Decks lockup - pergola-over-water mark + wordmark.
+// Draws in currentColor: cream on the charcoal sidebar, gold on the
+// cream mobile header (see .brand-lockup rules in global.css).
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<span class:list={['brand-lockup', className]}>
+  <svg
+    class="brand-mark"
+    viewBox="0 0 100 100"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Belvedere Decks pergola mark"
+  >
+    <path
+      d="M17 27.5 Q50 17 83 27.5"
+      stroke="currentColor"
+      stroke-width="5.8"
+      fill="none"
+      stroke-linecap="round"></path>
+    <g transform="translate(27,22.7) rotate(-13)">
+      <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
+    </g>
+    <g transform="translate(38.5,19.4) rotate(-6)">
+      <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
+    </g>
+    <g transform="translate(50,18.7)">
+      <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
+    </g>
+    <g transform="translate(61.5,19.4) rotate(6)">
+      <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
+    </g>
+    <g transform="translate(73,22.7) rotate(13)">
+      <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
+    </g>
+    <rect x="32" y="27" width="7" height="34" fill="currentColor"></rect>
+    <rect x="61" y="27" width="7" height="34" fill="currentColor"></rect>
+    <path
+      d="M10 66 q10 -7 20 0 t20 0 t20 0 t20 0"
+      stroke="currentColor"
+      stroke-width="5"
+      fill="none"
+      stroke-linecap="round"></path>
+    <path
+      d="M14 77 q9 -6.5 18 0 t18 0 t18 0 t18 0"
+      stroke="currentColor"
+      stroke-width="4.6"
+      fill="none"
+      stroke-linecap="round"></path>
+    <path
+      d="M20 88 q7.5 -6 15 0 t15 0 t15 0 t15 0"
+      stroke="currentColor"
+      stroke-width="4.2"
+      fill="none"
+      stroke-linecap="round"></path>
+  </svg>
+  <span class="brand-word">Belvedere Decks</span>
+</span>

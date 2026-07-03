@@ -1,5 +1,5 @@
 /* ============================================================
-   Belvedere Decks — "Architectural Luxury" design system
+   Belvedere Decks - "Architectural Luxury" design system
    Ported from the Band Outdoor Living site (index.css):
    charcoal #1C1C1C · warm off-white #F5F2EE · gold #B8965A
    Cormorant Garamond headings · Inter body · sharp corners
@@ -253,4 +253,22 @@ header.mobile .header-phone { display: flex; align-items: center; color: var(--a
   table.compare, table.compare tbody, table.compare tr, table.compare td { display: block; width: 100% !important; }
   table.compare thead { display: none; }
   table.compare tr { border-bottom: 2px solid var(--border); padding: 8px 0; }
+}
+
+/* ---------- brand lockup (Logo.astro) - cream on charcoal, gold on cream ---------- */
+.brand-lockup { display: inline-flex; align-items: center; gap: 10px; color: inherit; }
+.brand-mark { width: 34px; height: 34px; flex: none; }
+.brand-word {
+  font-family: var(--serif); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.11em; font-size: 0.92rem; white-space: nowrap; line-height: 1;
+}
+.sidebar .logo-block .brand-lockup { color: var(--sidebar-fg); }
+.sidebar .logo-block .brand-mark { width: 30px; height: 30px; }
+.sidebar .logo-block .brand-word { font-size: 0.82rem; letter-spacing: 0.09em; }
+.sidebar .logo-block a p { margin-top: 6px; }
+header.mobile .brand-home { text-decoration: none; color: var(--accent); display: flex; align-items: center; }
+header.mobile .brand-home .brand-mark { width: 26px; height: 26px; }
+header.mobile .brand-home .brand-word { font-size: 0.78rem; }
+@media (max-width: 430px) {
+  header.mobile .brand-home .brand-word { display: none; }
 }

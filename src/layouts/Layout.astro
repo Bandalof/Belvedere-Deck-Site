@@ -1,5 +1,6 @@
 ---
 import { brand } from '../config/brand';
+import Logo from '../components/Logo.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -76,7 +77,7 @@ const schema = {
   <body>
     {!brand.launched && (
       <div class="preview-banner">
-        PREVIEW BUILD — NOT PUBLISHED. Do not deploy publicly until the MHIC license number is issued and entered in brand.ts (COMAR 09.08.01.09).
+        PREVIEW BUILD: NOT PUBLISHED. Do not deploy publicly until the MHIC license number is issued and entered in brand.ts (COMAR 09.08.01.09).
       </div>
     )}
 
@@ -84,8 +85,8 @@ const schema = {
       <aside class="sidebar" id="sidebar">
         <button class="close-btn" id="close-btn" aria-label="Close menu">✕</button>
         <div class="logo-block">
-          <a href="/">
-            <h1>Belvedere Decks</h1>
+          <a href="/" aria-label="Belvedere Decks home">
+            <Logo />
             <p>Premium Composite Decking</p>
           </a>
           <a class="side-phone" href={`tel:${brand.phone || brand.phoneDisplay}`}>
@@ -116,7 +117,7 @@ const schema = {
           <p>
             {brand.mhic
               ? `MHIC #${brand.mhic} · Licensed & Insured`
-              : 'MHIC license pending — not yet offering home improvement services'}
+              : 'MHIC license pending. Not yet offering home improvement services.'}
           </p>
         </div>
       </aside>
@@ -130,6 +131,9 @@ const schema = {
           </svg>
           <span>Menu</span>
         </button>
+        <a class="brand-home" href="/" aria-label="Belvedere Decks home">
+          <Logo />
+        </a>
         <a class="header-phone" href={`tel:${brand.phone || brand.phoneDisplay}`} aria-label="Call us">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -167,7 +171,7 @@ const schema = {
               {brand.legalName} · Serving Maryland, based in Montgomery County ·
               {brand.mhic
                 ? `MHIC #${brand.mhic} · Licensed & Insured`
-                : 'MHIC license pending — not yet offering home improvement services'}
+                : 'MHIC license pending. Not yet offering home improvement services.'}
             </p>
           </div>
         </footer>
