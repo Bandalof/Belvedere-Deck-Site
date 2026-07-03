@@ -1,0 +1,80 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { brand } from '../config/brand';
+---
+<Layout
+  title="Contact | Belvedere Decks — Get Your Exact Deck Price"
+  description="Contact Belvedere Decks in Montgomery County, MD. Honest phone range first, exact price at your kitchen table the same visit."
+>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">Contact</p>
+      <h1>Start with a straight answer.</h1>
+      <div class="rule"></div>
+      <p class="lead">
+        Tell us about the deck and we'll give you an honest price range on the phone —
+        before anyone drives to your house. Text 3–4 photos (one from the yard, one
+        underneath if you can) and we'll come prepared.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid cols-2">
+        <div>
+          <h2>Reach us directly</h2>
+          <p>
+            <strong>Call or text:</strong> <a href={`tel:${brand.phone || brand.phoneDisplay}`}>{brand.phoneDisplay}</a><br />
+            <strong>Email:</strong> <a href={`mailto:${brand.email}`}>{brand.email}</a>
+          </p>
+          <p>
+            We respond to every inquiry the same day — usually within the hour. If we're
+            on a job site, you'll get a text back within minutes and a call as soon as
+            we're off the ladder.
+          </p>
+          <div class="notice">
+            <strong>What happens next:</strong> a short phone conversation about the deck
+            and your range, then one visit where we inspect, measure, and build your exact
+            price on the iPad in front of you. About an hour, and it works best when
+            everyone who weighs in can be there.
+          </div>
+        </div>
+        <div>
+          <h2>Or send the details</h2>
+          <!-- TODO before launch: set brand.formEndpoint (Formspree or serverless
+               function) and TEST an end-to-end submission. Do not launch with a
+               dead form — audit item. -->
+          <form class="contact" method="POST" action={brand.formEndpoint || '#'}>
+            <div>
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" required />
+            </div>
+            <div>
+              <label for="phone">Phone</label>
+              <input id="phone" name="phone" type="tel" required />
+            </div>
+            <div>
+              <label for="town">Town</label>
+              <input id="town" name="town" type="text" placeholder="e.g., Olney" />
+            </div>
+            <div>
+              <label for="service">What does the deck need?</label>
+              <select id="service" name="service">
+                <option>Not sure — that's your job</option>
+                <option>New boards (Refloor)</option>
+                <option>Boards + railings (Facelift)</option>
+                <option>A brand-new custom deck</option>
+              </select>
+            </div>
+            <div>
+              <label for="message">Anything else we should know?</label>
+              <textarea id="message" name="message" rows="4"></textarea>
+            </div>
+            <button class="btn primary" type="submit">Send it</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

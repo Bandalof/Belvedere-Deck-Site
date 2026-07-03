@@ -1,0 +1,47 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { towns } from '../../data/towns';
+
+export function getStaticPaths() {
+  return towns.map((town) => ({ params: { slug: town.slug }, props: { town } }));
+}
+const { town } = Astro.props;
+---
+<Layout title={`${town.title} | Belvedere Decks`} description={town.description}>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">Serving {town.name} · {town.zip}</p>
+      <h1>Deck builder in {town.name}, Maryland.</h1>
+      <div class="rule"></div>
+      <p class="lead">{town.intro}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Decks in {town.name}</h2>
+      <p>{town.housing}</p>
+
+      <h2>What we build here</h2>
+      <p>{town.fit}</p>
+
+      <h2>Permits in {town.name}</h2>
+      <p>{town.permitNote}</p>
+      <p>
+        The full homeowner's guide:
+        <a href="/montgomery-county-deck-permits">Montgomery County deck permits, explained</a>.
+      </p>
+
+      <div class="notice">
+        <strong>Published pricing:</strong> refloors $14k–$20k, facelifts $24k–$35k,
+        custom builds $40k–$75k+. See <a href="/pricing">what decks really cost</a> —
+        then get your exact number at your kitchen table, same visit.
+      </div>
+
+      <!-- TODO: add a local project gallery entry for this town when the first
+           project here is photographed (content notes item). -->
+
+      <p><a class="btn primary" href="/contact">Get your {town.name} deck priced</a></p>
+    </div>
+  </section>
+</Layout>

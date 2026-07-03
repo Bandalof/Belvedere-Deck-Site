@@ -1,0 +1,128 @@
+---
+import { brand } from '../config/brand';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, brand.domain).href;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: brand.name,
+  legalName: brand.legalName,
+  url: brand.domain,
+  email: brand.email,
+  description: brand.tagline,
+  areaServed: [
+    'Potomac MD', 'North Potomac MD', 'Gaithersburg MD', 'Bethesda MD',
+    'Olney MD', 'Boyds MD', 'Clarksburg MD', 'Montgomery County MD',
+  ].map((name) => ({ '@type': 'Place', name })),
+  address: { '@type': 'PostalAddress', addressRegion: 'MD', addressCountry: 'US' },
+  ...(brand.phone ? { telephone: brand.phone } : {}),
+  ...(brand.mhic
+    ? {
+        hasCredential: {
+          '@type': 'EducationalOccupationalCredential',
+          credentialCategory: 'license',
+          name: `Maryland Home Improvement Commission License #${brand.mhic}`,
+        },
+      }
+    : {}),
+};
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {!brand.launched && <meta name="robots" content="noindex, nofollow" />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={brand.name} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </head>
+  <body>
+    {!brand.launched && (
+      <div class="preview-banner">
+        PREVIEW BUILD — NOT PUBLISHED. Do not deploy publicly until the MHIC license number is issued and entered in brand.ts (COMAR 09.08.01.09).
+      </div>
+    )}
+    <header class="site">
+      <div class="container bar">
+        <a class="logo" href="/">Belvedere <span>Decks</span></a>
+        <nav class="main">
+          <a href="/services/deck-refloor">Refloor</a>
+          <a href="/services/deck-facelift">Facelift</a>
+          <a href="/services/custom-decks">Custom Decks</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/montgomery-county-deck-permits">Permits</a>
+          <a href="/portfolio">Portfolio</a>
+          <a href="/about">About</a>
+          <a href="/contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main><slot /></main>
+
+    <footer class="site">
+      <div class="container">
+        <div class="cols">
+          <div>
+            <h3>{brand.name}</h3>
+            <p>
+              Composite deck specialists serving Montgomery County, Maryland.
+              Transparent pricing, code-first construction, and a 10-year written
+              workmanship warranty on every project.
+            </p>
+          </div>
+          <div>
+            <h3>Services</h3>
+            <p>
+              <a href="/services/deck-refloor">Deck Refloor</a><br />
+              <a href="/services/deck-facelift">Deck Facelift</a><br />
+              <a href="/services/custom-decks">Custom Decks</a><br />
+              <a href="/pricing">What Decks Cost</a>
+            </p>
+          </div>
+          <div>
+            <h3>Service Area</h3>
+            <p>
+              <a href="/towns/potomac">Potomac</a><br />
+              <a href="/towns/north-potomac-kentlands">N. Potomac &amp; Kentlands</a><br />
+              <a href="/towns/bethesda">Bethesda</a><br />
+              <a href="/towns/olney">Olney</a><br />
+              <a href="/towns/boyds">Boyds</a><br />
+              <a href="/towns/clarksburg">Clarksburg</a>
+            </p>
+          </div>
+          <div>
+            <h3>Resources</h3>
+            <p>
+              <a href="/montgomery-county-deck-permits">MoCo Permit Guide</a><br />
+              <a href="/portfolio">Portfolio</a><br />
+              <a href="/contact">Contact</a>
+            </p>
+          </div>
+        </div>
+        <div class="legal">
+          <p>
+            {brand.legalName} · Montgomery County, MD ·
+            {brand.mhic ? `MHIC #${brand.mhic} · Licensed & insured · ` : 'MHIC license pending — not yet offering home improvement services · '}
+            © {new Date().getFullYear()} {brand.legalName}. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

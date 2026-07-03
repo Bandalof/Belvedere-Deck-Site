@@ -1,0 +1,71 @@
+:root {
+  --green-950: #141c13;
+  --green-900: #1a2419;
+  --green-800: #24331f;
+  --green-100: #e8ede4;
+  --brass: #b08d4f;
+  --brass-light: #c9a86a;
+  --cream: #f6f3ec;
+  --paper: #fffdf8;
+  --ink: #22261f;
+  --ink-soft: #55594f;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Helvetica Neue', Arial, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); color: var(--ink); background: var(--paper); line-height: 1.7; }
+h1, h2, h3 { font-family: var(--serif); font-weight: normal; line-height: 1.25; color: var(--green-900); }
+h1 { font-size: clamp(2rem, 5vw, 3rem); }
+h2 { font-size: clamp(1.5rem, 3.5vw, 2.1rem); margin-bottom: 0.75rem; }
+h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+p { margin-bottom: 1rem; }
+a { color: var(--brass); }
+.container { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+.section { padding: 72px 0; }
+.section.alt { background: var(--cream); }
+.section.dark { background: var(--green-900); color: var(--green-100); }
+.section.dark h2, .section.dark h3 { color: var(--cream); }
+.eyebrow { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); margin-bottom: 0.75rem; font-weight: 600; }
+.rule { width: 56px; height: 2px; background: var(--brass); margin: 20px 0; }
+.lead { font-size: 1.15rem; color: var(--ink-soft); max-width: 62ch; }
+.btn { display: inline-block; padding: 14px 28px; font-weight: 600; text-decoration: none; border-radius: 3px; font-size: 1rem; }
+.btn.primary { background: var(--brass); color: var(--green-950); }
+.btn.primary:hover { background: var(--brass-light); }
+.btn.ghost { border: 1px solid var(--brass); color: var(--brass); }
+.grid { display: grid; gap: 28px; }
+@media (min-width: 720px) { .grid.cols-3 { grid-template-columns: repeat(3, 1fr); } .grid.cols-2 { grid-template-columns: repeat(2, 1fr); } }
+.card { background: var(--paper); border: 1px solid #e3ded2; border-radius: 4px; padding: 28px; }
+.card .price { font-family: var(--serif); font-size: 1.5rem; color: var(--green-900); margin: 8px 0; }
+.card ul { margin: 0 0 1rem 1.1rem; }
+.checklist { list-style: none; margin: 1rem 0; }
+.checklist li { padding-left: 1.6rem; position: relative; margin-bottom: 0.6rem; }
+.checklist li::before { content: '✓'; position: absolute; left: 0; color: var(--brass); font-weight: 700; }
+table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e3ded2; vertical-align: top; }
+th { font-family: var(--serif); color: var(--green-900); }
+.hero { background: linear-gradient(160deg, var(--green-950), var(--green-800)); color: var(--green-100); padding: 96px 0 88px; }
+.hero h1 { color: var(--cream); max-width: 20ch; }
+.hero .lead { color: #cfc9bb; }
+.preview-banner { background: #7a1f1f; color: #fff; text-align: center; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.03em; }
+header.site { background: var(--green-900); }
+header.site .bar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; flex-wrap: wrap; gap: 12px; }
+.logo { font-family: var(--serif); font-size: 1.35rem; color: var(--cream); text-decoration: none; letter-spacing: 0.05em; }
+.logo span { color: var(--brass); }
+nav.main a { color: var(--green-100); text-decoration: none; margin-left: 20px; font-size: 0.92rem; }
+nav.main a:hover { color: var(--brass-light); }
+footer.site { background: var(--green-950); color: #a8a494; padding: 56px 0 32px; font-size: 0.9rem; }
+footer.site h3 { color: var(--cream); font-size: 1rem; margin-bottom: 0.75rem; }
+footer.site a { color: #cfc9bb; text-decoration: none; }
+footer.site .cols { display: grid; gap: 32px; }
+@media (min-width: 720px) { footer.site .cols { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+footer.site .legal { border-top: 1px solid #2c3a29; margin-top: 40px; padding-top: 20px; font-size: 0.8rem; }
+.faq details { border-bottom: 1px solid #e3ded2; padding: 14px 0; }
+.faq summary { font-family: var(--serif); font-size: 1.05rem; color: var(--green-900); cursor: pointer; }
+.faq details p { margin: 10px 0 0; }
+form.contact { display: grid; gap: 16px; max-width: 560px; }
+form.contact label { font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 4px; }
+form.contact input, form.contact select, form.contact textarea {
+  width: 100%; padding: 12px; border: 1px solid #cfc9bb; border-radius: 3px; font-family: var(--sans); font-size: 1rem; background: #fff;
+}
+.notice { background: var(--cream); border-left: 3px solid var(--brass); padding: 16px 20px; margin: 1.25rem 0; font-size: 0.95rem; }
