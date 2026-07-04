@@ -103,21 +103,37 @@ main.content { padding-top: 72px; }
   aside.sidebar { transform: translateX(-100%); }
   body.nav-open aside.sidebar { transform: translateX(0); box-shadow: var(--shadow-medium); }
 }
-/* centered, larger brand lockup */
+/* centered, larger brand lockup (desktop: true center; there's plenty of room) */
 header.topbar .brand-home {
   position: absolute; left: 50%; transform: translateX(-50%);
   text-decoration: none; color: var(--accent); display: flex; align-items: center;
 }
+/* mobile/tablet: 3-column grid instead of absolute centering, so the logo
+   can NEVER be overlapped by the buttons - each element owns its own track */
+@media (max-width: 1023.9px) {
+  header.topbar {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center; gap: 8px; padding: 0 12px;
+  }
+  header.topbar .brand-home {
+    position: static; transform: none; justify-self: center; min-width: 0;
+  }
+}
 /* phone button sits right beside the estimate button */
-.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; justify-self: end; }
 .phone-btn {
   padding: 10px 14px; border: 1px solid var(--accent); color: var(--accent-dark);
   background: none; font-size: 0.9rem; font-weight: 700;
 }
 .phone-btn:hover { background: rgba(184, 150, 90, 0.08); }
-.topbar-cta { padding: 10px 16px; font-size: 0.85rem; }
+.topbar-cta { padding: 10px 16px; font-size: 0.85rem; white-space: nowrap; }
 @media (max-width: 899.9px) { .phone-btn .phone-num { display: none; } .phone-btn { padding: 10px 12px; } }
-@media (max-width: 640px) { .topbar-cta { padding: 9px 12px; font-size: 0.78rem; } }
+@media (max-width: 640px) {
+  .topbar-cta { padding: 9px 11px; font-size: 0.75rem; }
+  .topbar-actions { gap: 6px; }
+  header.topbar #menu-btn span { display: none; } /* icon-only Menu; aria-label keeps it accessible */
+  header.topbar #menu-btn { padding: 8px 6px; }
+}
 .scrim { display: none; }
 body.nav-open .scrim {
   display: block; position: fixed; inset: 0; z-index: 45; background: rgba(28, 28, 28, 0.5);
