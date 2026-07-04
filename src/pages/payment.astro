@@ -4,41 +4,48 @@ import { brand } from '../config/brand';
 ---
 <Layout
   title="Make a Payment | Belvedere Decks"
-  description="Pay your Belvedere Decks invoice. Payments follow the three-installment schedule in your contract: deposit, start of work, and final walkthrough."
+  description="Pay your Belvedere Decks invoice securely online or by check. Payments follow the three-installment schedule in your contract: deposit, project start, and final walkthrough."
 >
   <section class="hero">
     <div class="container">
-      <p class="eyebrow">Payments</p>
+      <p class="eyebrow">Payment Link</p>
       <h1>Make a payment.</h1>
       <div class="rule"></div>
       <p class="lead">
-        Every project follows the same simple schedule, written into your contract
-        before work begins. No surprises here either.
+        Make secure payments for your deck project easily and conveniently. The
+        schedule below is written into your contract before work begins.
       </p>
     </div>
   </section>
 
   <section class="section">
     <div class="container">
-      <h2 style="margin-top: 0;">How payments are structured</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Online Payment</h3>
+          <p>Pay securely through our online portal. Fast, easy, and convenient.</p>
+          <!-- TODO: point at the payment processor link when it's set up (next step).
+               Until then the button is disabled-styled so nothing dead-ends. -->
+          <p><a class="btn primary" href="/estimate" aria-disabled="true"
+            style="opacity: 0.55; pointer-events: none;">Pay Online (coming soon)</a></p>
+        </div>
+        <div class="card">
+          <h3>Pay by Check</h3>
+          <p>Prefer to pay by check? Make checks payable to:</p>
+          <p><strong>{brand.legalName}</strong><br />
+          <span style="color: var(--muted-foreground); font-size: 0.9rem;">Address provided upon contract signing</span></p>
+        </div>
+      </div>
+
+      <h2>Payment schedule</h2>
+      <p>Our payment structure is designed to be fair and transparent:</p>
       <table class="stack">
         <tbody>
-          <tr><th>1. At contract signing</th><td>One-third deposit. This reserves your build slot and covers material ordering.</td></tr>
-          <tr><th>2. At start of work</th><td>One-third when materials are delivered and work begins.</td></tr>
-          <tr><th>3. At completion</th><td>The final third after substantial completion and your final walkthrough, when you're satisfied.</td></tr>
+          <tr><th>1/3 · At contract signing</th><td>The deposit. This reserves your build slot and covers material ordering.</td></tr>
+          <tr><th>1/3 · At project start</th><td>When materials are delivered and work begins.</td></tr>
+          <tr><th>1/3 · After final walkthrough</th><td>The final third after substantial completion, when you've walked the finished deck and you're satisfied.</td></tr>
         </tbody>
       </table>
-
-      <h2>Ways to pay</h2>
-      <ul class="checklist">
-        <li>Check, payable to {brand.legalName}</li>
-        <li>Zelle <!-- TODO: add Zelle contact once business banking is live --></li>
-        <li>Card payment online <!-- TODO: add processor link (next step - to be set up together) --></li>
-      </ul>
-
-      <!-- ONLINE PAYMENT BUTTON: uncomment and point at the processor link when ready.
-      <p><a class="btn primary" href="TODO-PAYMENT-URL">Pay Your Invoice Online</a></p>
-      -->
 
       <div class="notice">
         <strong>A note on Maryland law:</strong> home improvement deposits in Maryland are
@@ -47,8 +54,10 @@ import { brand } from '../config/brand';
         front, that's a red flag, ours included.
       </div>
 
+      <h2>Questions about payment?</h2>
       <p>
-        Questions about an invoice? Call or text
+        Contact us directly for any payment-related questions or to discuss payment
+        options: call or text
         <a href={`tel:${brand.phone || brand.phoneDisplay}`}>{brand.phoneDisplay}</a>
         or email <a href={`mailto:${brand.email}`}>{brand.email}</a>.
       </p>
