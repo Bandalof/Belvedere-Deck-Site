@@ -1,0 +1,57 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { brand } from '../config/brand';
+---
+<Layout
+  title="Make a Payment | Belvedere Decks"
+  description="Pay your Belvedere Decks invoice. Payments follow the three-installment schedule in your contract: deposit, start of work, and final walkthrough."
+>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">Payments</p>
+      <h1>Make a payment.</h1>
+      <div class="rule"></div>
+      <p class="lead">
+        Every project follows the same simple schedule, written into your contract
+        before work begins. No surprises here either.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 style="margin-top: 0;">How payments are structured</h2>
+      <table class="stack">
+        <tbody>
+          <tr><th>1. At contract signing</th><td>One-third deposit. This reserves your build slot and covers material ordering.</td></tr>
+          <tr><th>2. At start of work</th><td>One-third when materials are delivered and work begins.</td></tr>
+          <tr><th>3. At completion</th><td>The final third after substantial completion and your final walkthrough, when you're satisfied.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Ways to pay</h2>
+      <ul class="checklist">
+        <li>Check, payable to {brand.legalName}</li>
+        <li>Zelle <!-- TODO: add Zelle contact once business banking is live --></li>
+        <li>Card payment online <!-- TODO: add processor link (next step - to be set up together) --></li>
+      </ul>
+
+      <!-- ONLINE PAYMENT BUTTON: uncomment and point at the processor link when ready.
+      <p><a class="btn primary" href="TODO-PAYMENT-URL">Pay Your Invoice Online</a></p>
+      -->
+
+      <div class="notice">
+        <strong>A note on Maryland law:</strong> home improvement deposits in Maryland are
+        capped at one-third of the contract price, and we never ask for final payment
+        until the work is substantially complete. If any contractor asks for more up
+        front, that's a red flag, ours included.
+      </div>
+
+      <p>
+        Questions about an invoice? Call or text
+        <a href={`tel:${brand.phone || brand.phoneDisplay}`}>{brand.phoneDisplay}</a>
+        or email <a href={`mailto:${brand.email}`}>{brand.email}</a>.
+      </p>
+    </div>
+  </section>
+</Layout>

@@ -2,9 +2,10 @@
    Belvedere Decks - "Architectural Luxury" design system
    Ported from the Band Outdoor Living site (index.css):
    charcoal #1C1C1C · warm off-white #F5F2EE · gold #B8965A
-   Cormorant Garamond headings · Inter body · sharp corners
+   Cormorant Garamond headings (bold) · Atkinson Hyperlegible body
+   (chosen for maximum legibility for older readers) · sharp corners
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
 
 :root {
   --background: #f5f2ee;
@@ -28,7 +29,7 @@
   --shadow-medium: 0 8px 30px -8px rgba(28, 28, 28, 0.15);
   --shadow-cta: 0 6px 24px -4px rgba(184, 150, 90, 0.4);
   --serif: 'Cormorant Garamond', Georgia, serif;
-  --sans: 'Inter', system-ui, sans-serif;
+  --sans: 'Atkinson Hyperlegible', 'Inter', system-ui, sans-serif;
   --sidebar-w: 256px;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,10 +41,10 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3 { font-family: var(--serif); font-weight: 300; line-height: 1.2; color: var(--primary); }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.2; color: var(--primary); }
 h1 { font-size: clamp(2.25rem, 5vw, 3rem); margin-bottom: 1.25rem; }
-h2 { font-size: 1.6rem; font-weight: 400; margin: 2rem 0 0.75rem; }
-h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.4rem; }
+h2 { font-size: 1.6rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem; }
 p { margin-bottom: 1rem; }
 a { color: var(--accent-dark); }
 
@@ -85,27 +86,38 @@ aside.sidebar {
 main.content { min-height: 100vh; }
 @media (min-width: 1024px) { main.content { margin-left: var(--sidebar-w); } }
 
-/* fixed desktop CTA */
-.fixed-cta { display: none; }
-@media (min-width: 1024px) { .fixed-cta { display: block; position: fixed; right: 32px; top: 16px; z-index: 30; } }
-
-/* mobile header */
-header.mobile {
-  position: fixed; top: 0; left: 0; right: 0; height: 64px; z-index: 40;
+/* top bar - always visible, on every screen size and at every scroll position */
+header.topbar {
+  position: fixed; top: 0; left: 0; right: 0; height: 72px; z-index: 40;
   background: var(--card); border-bottom: 1px solid var(--border-light);
   display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
 }
-header.mobile .brand { font-family: var(--serif); font-weight: 300; color: var(--primary); font-size: 1.05rem; }
-header.mobile button {
+@media (min-width: 1024px) { header.topbar { left: var(--sidebar-w); padding: 0 28px; } }
+header.topbar button {
   display: flex; align-items: center; gap: 8px; background: none; border: none;
   font: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; padding: 8px;
 }
-@media (min-width: 1024px) { header.mobile { display: none; } }
+@media (min-width: 1024px) { header.topbar #menu-btn { display: none; } }
+main.content { padding-top: 72px; }
 @media (max-width: 1023.9px) {
   aside.sidebar { transform: translateX(-100%); }
   body.nav-open aside.sidebar { transform: translateX(0); box-shadow: var(--shadow-medium); }
-  main.content { padding-top: 64px; }
 }
+/* centered, larger brand lockup */
+header.topbar .brand-home {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  text-decoration: none; color: var(--accent); display: flex; align-items: center;
+}
+/* phone button sits right beside the estimate button */
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.phone-btn {
+  padding: 10px 14px; border: 1px solid var(--accent); color: var(--accent-dark);
+  background: none; font-size: 0.9rem; font-weight: 700;
+}
+.phone-btn:hover { background: rgba(184, 150, 90, 0.08); }
+.topbar-cta { padding: 10px 16px; font-size: 0.85rem; }
+@media (max-width: 899.9px) { .phone-btn .phone-num { display: none; } .phone-btn { padding: 10px 12px; } }
+@media (max-width: 640px) { .topbar-cta { padding: 9px 12px; font-size: 0.78rem; } }
 .scrim { display: none; }
 body.nav-open .scrim {
   display: block; position: fixed; inset: 0; z-index: 45; background: rgba(28, 28, 28, 0.5);
@@ -188,10 +200,14 @@ form.contact input:focus, form.contact select:focus, form.contact textarea:focus
 .faq details { border-bottom: 1px solid var(--border-light); padding: 14px 0; }
 .faq summary { font-family: var(--serif); font-size: 1.1rem; color: var(--primary); cursor: pointer; }
 
+/* internal preview warning - pinned to the BOTTOM so it never covers the top bar */
 .preview-banner {
   background: #7a1f1f; color: #fff; text-align: center; padding: 10px 16px;
-  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; position: relative; z-index: 60;
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
 }
+@media (min-width: 1024px) { .preview-banner { left: var(--sidebar-w); } }
+body:has(.preview-banner) main.content { padding-bottom: 56px; }
 footer.page-footer { background: var(--sidebar-bg); color: rgba(245,242,238,0.5); padding: 24px 0; font-size: 0.78rem; }
 footer.page-footer a { color: rgba(245,242,238,0.7); }
 
@@ -239,7 +255,6 @@ footer.page-footer a { color: rgba(245,242,238,0.7); }
   cursor: pointer; padding: 8px; z-index: 51;
 }
 @media (max-width: 1023.9px) { .close-btn { display: block; } }
-header.mobile .header-phone { display: flex; align-items: center; color: var(--accent-dark); padding: 8px; }
 
 /* stack tables on phones so columns never squeeze */
 @media (max-width: 640px) {
@@ -266,9 +281,16 @@ header.mobile .header-phone { display: flex; align-items: center; color: var(--a
 .sidebar .logo-block .brand-mark { width: 30px; height: 30px; }
 .sidebar .logo-block .brand-word { font-size: 0.82rem; letter-spacing: 0.09em; }
 .sidebar .logo-block a p { margin-top: 6px; }
-header.mobile .brand-home { text-decoration: none; color: var(--accent); display: flex; align-items: center; }
-header.mobile .brand-home .brand-mark { width: 26px; height: 26px; }
-header.mobile .brand-home .brand-word { font-size: 0.78rem; }
-@media (max-width: 430px) {
-  header.mobile .brand-home .brand-word { display: none; }
+/* homepage hero lockup - logo mark beside the Belvedere Decks name */
+.hero-lockup { color: var(--accent); margin: 0 0 12px; gap: 14px; }
+.hero-lockup .brand-mark { width: clamp(38px, 5vw, 52px); height: clamp(38px, 5vw, 52px); }
+.hero-lockup .brand-word {
+  font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+header.topbar .brand-home .brand-mark { width: 38px; height: 38px; }
+header.topbar .brand-home .brand-word { font-size: 1.05rem; }
+@media (max-width: 560px) {
+  header.topbar .brand-home .brand-word { display: none; }
+  header.topbar .brand-home .brand-mark { width: 32px; height: 32px; }
 }

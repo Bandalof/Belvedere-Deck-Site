@@ -1,16 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Logo from '../components/Logo.astro';
 ---
 <Layout
   title="Belvedere Decks | Maryland Composite Deck Builder, Based in Montgomery County"
   description="Maryland's straight-answer deck company. Premium TimberTech and Trex decks with published pricing, an exact price at your kitchen table the same visit, and a 10-year workmanship warranty."
 >
-  <section class="hero" style="min-height: calc(100vh - 64px); display: flex; flex-direction: column; padding: 0;">
+  <section class="hero" style="min-height: calc(100vh - 72px); display: flex; flex-direction: column; padding: 0;">
     <div class="container" style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 64px; padding-bottom: 64px;">
       <p class="eyebrow">Serving Maryland · Based in Montgomery County</p>
-      <h2 style="font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--accent); margin: 0 0 12px; font-weight: 300; letter-spacing: 0.02em;">
-        Belvedere Decks
-      </h2>
+      <Logo class="hero-lockup" />
       <h1 style="font-size: clamp(2.5rem, 6vw, 3.75rem); margin-bottom: 1.5rem;">
         Your exact deck price,<br />same visit.
       </h1>
@@ -62,13 +61,13 @@ import Layout from '../layouts/Layout.astro';
       <div class="grid cols-3" style="margin-top: 36px;">
         <div class="card">
           <h3>Deck Resurfacing</h3>
-          <p class="price">$14,000–$35,000</p>
+          <p class="price">$8,000–$35,000</p>
           <p>Your frame stays. New composite boards only, or boards plus new railings for the complete transformation. Two levels, explained in plain English.</p>
           <a href="/services/deck-resurfacing">Compare the two levels →</a>
         </div>
         <div class="card">
           <h3>New Deck Builds</h3>
-          <p class="price">$40,000–$75,000+</p>
+          <p class="price">$25,000–$75,000+</p>
           <p>Fully custom: designed, engineered, permitted, and inspected. Includes tearing out an old deck and building new. One design visit, fixed price.</p>
           <a href="/services/new-deck-builds">New build details →</a>
         </div>
@@ -111,7 +110,7 @@ import Layout from '../layouts/Layout.astro';
         <tbody>
           <tr><th>1. Call or book</th><td>Tell us about the deck by phone, or pick a time on the <a href="/estimate">live calendar</a>. Either way, you get an honest price range up front.</td></tr>
           <tr><th>2. The visit</th><td>We walk the deck together and tell you what we find, good and bad. Then we measure and build your actual price on the iPad while you watch.</td></tr>
-          <tr><th>3. Three options</th><td>Good, better, and best, with the same code-perfect structure under every tier. We never tier the safety.</td></tr>
+          <tr><th>3. Three options</th><td>Good, better, and best options for the parts of the deck you see and touch: the deck boards, railings, and fascia. The same code-perfect structure sits under every tier. We never tier the safety.</td></tr>
           <tr><th>4. The build</th><td>Permits and inspections handled, a clean site every night, and a final walkthrough on your finished deck.</td></tr>
         </tbody>
       </table>
