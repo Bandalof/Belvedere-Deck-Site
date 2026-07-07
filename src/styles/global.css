@@ -92,21 +92,29 @@ header.topbar {
   background: var(--card); border-bottom: 1px solid var(--border-light);
   display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
 }
-@media (min-width: 1024px) { header.topbar { left: var(--sidebar-w); padding: 0 28px; } }
+/* desktop: no top bar. The sidebar already carries the brand + phone;
+   a single floating gold CTA sits top right (see .floating-cta below). */
+@media (min-width: 1024px) {
+  header.topbar { display: none; }
+}
 header.topbar button {
   display: flex; align-items: center; gap: 8px; background: none; border: none;
   font: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; padding: 8px;
 }
 @media (min-width: 1024px) { header.topbar #menu-btn { display: none; } }
 main.content { padding-top: 72px; }
+@media (min-width: 1024px) { main.content { padding-top: 0; } }
+/* floating estimate CTA - desktop only, replaces the old white top bar */
+.floating-cta { position: fixed; top: 20px; right: 28px; z-index: 45; }
+@media (max-width: 1023.9px) { .floating-cta { display: none; } }
 @media (max-width: 1023.9px) {
   aside.sidebar { transform: translateX(-100%); }
   body.nav-open aside.sidebar { transform: translateX(0); box-shadow: var(--shadow-medium); }
 }
-/* centered, larger brand lockup (desktop: true center; there's plenty of room) */
+/* centered brand lockup - grid track owns its space, never absolute-positioned */
 header.topbar .brand-home {
-  position: absolute; left: 50%; transform: translateX(-50%);
   text-decoration: none; color: var(--accent); display: flex; align-items: center;
+  justify-self: center; min-width: 0;
 }
 /* mobile/tablet: 3-column grid instead of absolute centering, so the logo
    can NEVER be overlapped by the buttons - each element owns its own track */
@@ -146,14 +154,22 @@ body.nav-open .scrim {
   text-decoration: none; border-radius: var(--radius); border: none;
   cursor: pointer; font-family: var(--sans); transition: all 0.3s;
 }
-.btn.primary { background: var(--cta-gradient); color: #fff; box-shadow: var(--shadow-cta); }
+.btn.primary { background: var(--cta-gradient); color: var(--primary-foreground); box-shadow: var(--shadow-cta); }
 .btn.primary:hover { box-shadow: 0 8px 32px -4px rgba(184, 150, 90, 0.5); }
+/* disabled state (e.g. estimate form before a date is picked): keep the text
+   readable instead of the browser's washed-out default over the gold */
+.btn.primary:disabled {
+  background: #e6ddcb; color: #7a6a4a; box-shadow: none; cursor: not-allowed; opacity: 1;
+}
 .btn.ghost { border: 1px solid rgba(245, 242, 238, 0.3); color: var(--primary-foreground); }
 .btn.ghost:hover { border-color: rgba(245, 242, 238, 0.6); }
 .section .btn.ghost { border-color: var(--accent); color: var(--accent-dark); }
 
 /* ---------- layout primitives (used by all pages) ---------- */
 .container { max-width: 64rem; margin: 0 auto; padding: 0 24px; }
+/* desktop: hug the sidebar instead of centering in the leftover space,
+   so there's no dead gap between the sidebar and the content */
+@media (min-width: 1024px) { .container { margin-left: 56px; margin-right: auto; } }
 .section { padding: 56px 0; }
 .section.alt { background: var(--card); border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); }
 .section.dark { background: var(--hero-gradient); color: var(--primary-foreground); }
@@ -310,3 +326,23 @@ header.topbar .brand-home .brand-word { font-size: 1.05rem; }
   header.topbar .brand-home .brand-word { display: none; }
   header.topbar .brand-home .brand-mark { width: 32px; height: 32px; }
 }
+
+/* ---------- photos & figures (TimberTech marketing assets) ---------- */
+.site-figure { margin: 0 0 1rem; }
+.site-figure img {
+  width: 100%; height: auto; display: block;
+  border: 1px solid var(--border); box-shadow: var(--shadow-soft);
+}
+.site-figure figcaption {
+  font-size: 0.85rem; color: var(--muted-foreground);
+  margin-top: 8px; line-height: 1.5;
+}
+.photo-credit { display: block; font-size: 0.75rem; opacity: 0.75; font-style: italic; }
+.badge-figure { display: flex; justify-content: center; }
+.badge-figure img { border: none; box-shadow: none; }
+.hero-photo { margin: 40px 0 0; }
+.hero-photo img { max-height: 480px; object-fit: cover; }
+.trust-badges { display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.trust-badges img { height: 64px; width: auto; }
+.footer-badges { display: flex; gap: 16px; align-items: center; margin-top: 12px; }
+.footer-badges img { height: 48px; width: auto; opacity: 0.9; }

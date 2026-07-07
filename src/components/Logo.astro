@@ -1,5 +1,7 @@
 ---
-// Belvedere Decks lockup - pergola-over-water mark + wordmark.
+// Belvedere Decks lockup - FINAL Pergola Badge mark (pergola over water,
+// circle-clipped) + wordmark. Matches Admin/Belvedere Decks Logos/
+// "Belvedere Decks Logo - FINAL (Pergola Badge)".
 // Draws in currentColor: cream on the charcoal sidebar, gold on the
 // cream mobile header (see .brand-lockup rules in global.css).
 interface Props {
@@ -14,49 +16,42 @@ const { class: className = '' } = Astro.props;
     viewBox="0 0 100 100"
     xmlns="http://www.w3.org/2000/svg"
     role="img"
-    aria-label="Belvedere Decks pergola mark"
+    aria-label="Belvedere Decks pergola badge mark"
   >
+    <defs>
+      <clipPath id="bd-logo-water">
+        <circle cx="50" cy="50" r="39"></circle>
+      </clipPath>
+    </defs>
+    <g clip-path="url(#bd-logo-water)">
+      <rect x="8" y="58" width="84" height="6.5" fill="currentColor"></rect>
+      <path d="M6 71.5 Q50 66.5 94 71.5 L94 77.5 Q50 72.5 6 77.5 Z" fill="currentColor"></path>
+      <path d="M6 82.5 Q50 77.5 94 82.5 L94 88.5 Q50 83.5 6 88.5 Z" fill="currentColor"></path>
+      <path d="M6 93.5 Q50 88.5 94 93.5 L94 108 L6 108 Z" fill="currentColor"></path>
+    </g>
     <path
       d="M17 27.5 Q50 17 83 27.5"
       stroke="currentColor"
       stroke-width="5.8"
       fill="none"
       stroke-linecap="round"></path>
-    <g transform="translate(27,22.7) rotate(-13)">
+    <g transform="translate(27,23.3) rotate(-13)">
       <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
     </g>
-    <g transform="translate(38.5,19.4) rotate(-6)">
+    <g transform="translate(38.5,21.39) rotate(-6)">
       <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
     </g>
-    <g transform="translate(50,18.7)">
+    <g transform="translate(50,20.75)">
       <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
     </g>
-    <g transform="translate(61.5,19.4) rotate(6)">
+    <g transform="translate(61.5,21.39) rotate(6)">
       <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
     </g>
-    <g transform="translate(73,22.7) rotate(13)">
+    <g transform="translate(73,23.3) rotate(13)">
       <rect x="-2.3" y="-9" width="4.6" height="10" rx="1.6" fill="currentColor"></rect>
     </g>
-    <rect x="32" y="27" width="7" height="34" fill="currentColor"></rect>
-    <rect x="61" y="27" width="7" height="34" fill="currentColor"></rect>
-    <path
-      d="M10 66 q10 -7 20 0 t20 0 t20 0 t20 0"
-      stroke="currentColor"
-      stroke-width="5"
-      fill="none"
-      stroke-linecap="round"></path>
-    <path
-      d="M14 77 q9 -6.5 18 0 t18 0 t18 0 t18 0"
-      stroke="currentColor"
-      stroke-width="4.6"
-      fill="none"
-      stroke-linecap="round"></path>
-    <path
-      d="M20 88 q7.5 -6 15 0 t15 0 t15 0 t15 0"
-      stroke="currentColor"
-      stroke-width="4.2"
-      fill="none"
-      stroke-linecap="round"></path>
+    <rect x="32" y="27" width="7" height="33" fill="currentColor"></rect>
+    <rect x="61" y="27" width="7" height="33" fill="currentColor"></rect>
   </svg>
   <span class="brand-word">Belvedere Decks</span>
 </span>
