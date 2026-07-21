@@ -3,7 +3,7 @@ import { neon } from "@neondatabase/serverless";
 import { todayKeyET } from "../src/lib/schedule.js";
 import { blockedWindows, getToken, graphConfigured, BOOKING_CALENDAR, FREEBUSY_CALENDARS } from "./_graph.js";
 
-// GET /api/health-calendar — the Monday-brief watchdog.
+// GET /api/health-calendar - the Monday-brief watchdog.
 // Verifies, from inside the system: credentials work, both calendars answer
 // free/busy, and the bookings database is reachable. Returns
 // { ok: boolean, issues: string[] } and never leaks secrets.
@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       await getToken();
     } catch {
-      issues.push("Microsoft sign-in failed — the client secret may be expired or revoked (rotate in Entra, update Vercel).");
+      issues.push("Microsoft sign-in failed - the client secret may be expired or revoked (rotate in Entra, update Vercel).");
     }
   }
 
@@ -36,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const today = todayKeyET();
       await blockedWindows(today, today);
     } catch {
-      issues.push(`Free/busy lookup failed for ${FREEBUSY_CALENDARS.join(", ")} — check the ${BOOKING_CALENDAR} mailbox and app permissions.`);
+      issues.push(`Free/busy lookup failed for ${FREEBUSY_CALENDARS.join(", ")} - check the ${BOOKING_CALENDAR} mailbox and app permissions.`);
     }
   }
 

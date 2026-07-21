@@ -20,7 +20,7 @@ import { brand } from '../config/brand';
     <div class="container">
       <div id="closed" style="display:none;" class="notice">
         <strong>This appointment is locked in.</strong> Online changes close a few hours
-        before your window — we may already be on the road. Reply to your confirmation
+        before your window; we may already be on the road. Reply to your confirmation
         email or call us and we'll sort it out together.
       </div>
 
@@ -33,15 +33,15 @@ import { brand } from '../config/brand';
             <button type="button" id="next-month" aria-label="Next month">›</button>
           </div>
           <div class="cal-grid" id="cal-grid"></div>
-          <p class="hint">You book a 2-hour arrival window — we call before heading your way. Weekdays 8 AM–7 PM · Saturdays 8 AM–4 PM · Book by the day before.</p>
+          <p class="hint">You book a 2-hour arrival window, and we call before heading your way. Weekdays 8 AM-7 PM · Saturdays 8 AM-4 PM · Book by the day before.</p>
           <div class="slots" id="slots"></div>
           <button class="btn primary" type="button" id="move-btn" disabled style="margin-top: 20px;">Pick a new date &amp; window above</button>
           <div class="form-msg" id="form-msg"></div>
 
           <hr style="margin: 32px 0; border: none; border-top: 1px solid #ddd;" />
-          <p style="font-size: 14px;">Can't make it work? You can cancel instead — no charge, no hard feelings.</p>
+          <p style="font-size: 14px;">Can't make it work? You can cancel instead. No charge, no hard feelings.</p>
           <button class="btn" type="button" id="cancel-btn">Cancel this appointment</button>
-          <button class="btn" type="button" id="cancel-confirm" style="display:none; background:#8b2222; color:#fff;">Yes — cancel my visit</button>
+          <button class="btn" type="button" id="cancel-confirm" style="display:none; background:#8b2222; color:#fff;">Yes, cancel my visit</button>
         </div>
       </div>
 
@@ -212,16 +212,16 @@ import { brand } from '../config/brand';
         if (res.ok) {
           manager.style.display = 'none';
           done.style.display = 'block';
-          done.innerHTML = `<strong>Your visit is cancelled.</strong> No charge, no hard feelings — book again any time.`;
+          done.innerHTML = `<strong>Your visit is cancelled.</strong> No charge, no hard feelings - book again any time.`;
           summary.textContent = 'This appointment has been cancelled.';
         } else {
           cancelConfirm.disabled = false;
-          cancelConfirm.textContent = 'Yes — cancel my visit';
+          cancelConfirm.textContent = 'Yes, cancel my visit';
           show('err', body.error || 'Could not cancel. Please call us.');
         }
       } catch {
         cancelConfirm.disabled = false;
-        cancelConfirm.textContent = 'Yes — cancel my visit';
+        cancelConfirm.textContent = 'Yes, cancel my visit';
         show('err', 'Something went wrong. Please call us.');
       }
     });
@@ -239,7 +239,7 @@ import { brand } from '../config/brand';
           return;
         }
         current = { dateKey: body.dateKey, windowId: body.windowId };
-        summary.textContent = `Hi ${body.firstName} — your visit is currently ${body.date}, arrival window ${body.windowLabel}.`;
+        summary.textContent = `Hi ${body.firstName}, your visit is currently ${body.date}, arrival window ${body.windowLabel}.`;
         if (!body.changeable) {
           closed.style.display = 'block';
           return;

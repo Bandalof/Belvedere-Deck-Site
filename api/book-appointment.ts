@@ -4,10 +4,11 @@ import { neon } from "@neondatabase/serverless";
 import { randomUUID } from "node:crypto";
 import { windowById, isBookableDate, humanDate } from "../src/lib/schedule.js";
 import { createBookingEvent, windowIsFree, graphConfigured, BOOKING_CALENDAR } from "./_graph.js";
+import { emailShell, heading, row, table, button, CHARCOAL } from "./_email.js";
 
 // Booking flow:
 // 1. Validate (window model, no same-day, job details required).
-// 2. Reserve the window in Postgres — unique constraint is the lock (409 on race).
+// 2. Reserve the window in Postgres - unique constraint is the lock (409 on race).
 // 3. Create a REAL calendar meeting on schedule@ with the customer as attendee.
 //    Exchange then handles updates/cancellations automatically when the event
 //    is dragged or deleted from any calendar app.
@@ -74,7 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Calendar check first (manual blocks, personal appointments). Best-effort:
-  // if Graph is briefly down we still book — the DB prevents double-booking
+  // if Graph is briefly down we still book - the DB prevents double-booking
   // against other website bookings, and the owner is notified either way.
   if (graphConfigured()) {
     try {
@@ -87,7 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rescheduleToken = randomUUID();
   let bookingId: number;
 
-  // Reserve the window — the unique constraint is the lock.
+  // Reserve the window - the unique constraint is the lock.
   try {
     const sql = neon(process.env.DATABASE_URL!);
     const inserted = await sql`
@@ -121,18 +122,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const date = humanDate(dateKey);
-  const rescheduleUrl = `${siteOrigin(req)}/reschedule?bid=${bookingId}&t=${rescheduleToken}`;
+  const origin = siteOrigin(req);
+  const rescheduleUrl = `${origin}/reschedule?bid=${bookingId}&t=${rescheduleToken}`;
 
-  const row = (label: string, value: string, alt = false) =>
-    `<tr${alt ? ' style="background: #f5f2ee;"' : ""}>
-      <td style="padding: 8px 12px; font-weight: bold; color: #1c1c1c; width: 150px; vertical-align: top;">${label}</td>
-      <td style="padding: 8px 12px;">${value}</td>
-    </tr>`;
-
-  const ownerHtml = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #1c1c1c; border-bottom: 2px solid #b8965a; padding-bottom: 8px;">New Site-Visit Booking</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+  const ownerHtml = emailShell(origin, `
+      ${heading("New Site-Visit Booking")}
+      ${table(`
         ${row("Name", escapeHtml(name))}
         ${row("Email", `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`, true)}
         ${row("Phone", `<a href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a>`)}
@@ -140,45 +135,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ${row("Service", escapeHtml(service))}
         ${row("Arrival Window", `${escapeHtml(date)} · ${escapeHtml(win.label)}`, true)}
         ${row("Project Details", escapeHtml(description))}
-      </table>
+      `)}
       <p style="margin-top: 16px; font-size: 13px; color: #555;">
         ${eventCreated
-          ? `On the ${escapeHtml(BOOKING_CALENDAR)} calendar with the customer invited — drag it there to reschedule; they're notified automatically.`
-          : `⚠️ Calendar write failed — this booking is in the database only. Add it to the calendar by hand.`}
-      </p>
-    </div>`;
+          ? `On the ${escapeHtml(BOOKING_CALENDAR)} calendar with the customer invited. Drag it there to reschedule; they are notified automatically.`
+          : `⚠️ Calendar write failed. This booking is in the database only; add it to the calendar by hand.`}
+      </p>`);
 
-  const customerHtml = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #1c1c1c; border-bottom: 2px solid #b8965a; padding-bottom: 8px;">You're booked, ${escapeHtml(name)}.</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+  const customerHtml = emailShell(origin, `
+      ${heading(`You're booked, ${escapeHtml(name)}.`)}
+      ${table(`
         ${row("Arrival window", `${escapeHtml(date)}<br/><strong>${escapeHtml(win.label)}</strong>`)}
         ${row("Address", escapeHtml(address), true)}
         ${row("Service", escapeHtml(service))}
-      </table>
-      <p style="margin-top: 16px; color: #1c1c1c;">
+      `)}
+      <p style="margin-top: 16px; color: ${CHARCOAL};">
         <strong>About your appointment window:</strong> your visit is scheduled for an arrival
         window, not an exact time. We aim for the start of your window, but site visits sometimes
-        run long and travel between homes varies — so <strong>we'll always call you before we head
+        run long and travel between homes varies, so <strong>we'll always call you before we head
         your way.</strong>
       </p>
-      <p style="color: #1c1c1c;">
+      <p style="color: ${CHARCOAL};">
         Plan on about an hour together. We'll walk the deck, measure, and build your exact price
-        in front of you — it works best when everyone who weighs in on the decision can be there.
+        in front of you. It works best when everyone who weighs in on the decision can be there.
       </p>
-      <p style="margin: 24px 0;">
-        <a href="${rescheduleUrl}"
-           style="background: #1c1c1c; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">
-          Need to change your appointment?
-        </a>
-      </p>
+      ${button(rescheduleUrl, "Need to change your appointment?")}
       <p style="font-size: 13px; color: #555;">
         The button above lets you reschedule or cancel up to 4 hours before your window.
         Inside that, just reply to this email or give us a call. You'll also receive a calendar
-        invitation from our scheduling calendar — accept it and the visit sits in your calendar,
+        invitation from our scheduling calendar. Accept it and the visit sits in your calendar,
         updating automatically if anything changes.
-      </p>
-    </div>`;
+      </p>`);
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);

@@ -1,8 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
-import { windowById, windowsFor, isBookableDate, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule.js";
+import { windowById, isBookableDate, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule.js";
 import { moveBookingEvent, windowIsFree, graphConfigured } from "./_graph.js";
+import { emailShell, heading, row, table, CHARCOAL, GOLD, CREAM } from "./_email.js";
 
 // GET  /api/reschedule?bid=..&t=..            -> booking summary (token-gated)
 // POST /api/reschedule {bid, t, dateKey, windowId} -> move the booking
@@ -38,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "Could not look up the booking." });
   }
   if (!booking) {
-    return res.status(404).json({ error: "Booking not found. The link may be outdated — call us and we'll sort it out." });
+    return res.status(404).json({ error: "Booking not found. The link may be outdated - call us and we'll sort it out." });
   }
 
   const currentDateKey = new Date(booking.booking_date).toISOString().split("T")[0];
@@ -108,7 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "Could not move the booking. Please try again or call us." });
   }
 
-  // Move the calendar meeting — Exchange notifies the customer automatically.
+  // Move the calendar meeting; Exchange notifies the customer automatically.
   if (graphConfigured() && booking.graph_event_id) {
     try {
       await moveBookingEvent(booking.graph_event_id, dateKey, win);
@@ -116,29 +117,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const date = humanDate(dateKey);
+  const oldDate = humanDate(currentDateKey);
+  const oldLabel = currentWin?.label || booking.booking_time;
+  const origin = siteOrigin(req);
+
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: MAIL_FROM,
       to: OWNER_EMAIL,
-      subject: `Rescheduled: ${booking.customer_name} → ${date}, ${win.label}`,
-      html: `<p style="font-family: Arial, sans-serif;">${booking.customer_name} moved their visit from
-        <strong>${humanDate(currentDateKey)}, ${currentWin?.label || booking.booking_time}</strong> to
-        <strong>${date}, ${win.label}</strong> (${booking.project_address}). The calendar has been updated.</p>`,
+      subject: `Rescheduled: ${booking.customer_name} moved to ${date}, ${win.label}`,
+      html: emailShell(origin, `
+        ${heading("Booking Rescheduled")}
+        ${table(`
+          ${row("Customer", String(booking.customer_name))}
+          ${row("Old window", `<span style="text-decoration: line-through; color: #888;">${oldDate}, ${oldLabel}</span>`, true)}
+          ${row("New window", `<strong>${date}, ${win.label}</strong>`)}
+          ${row("Address", String(booking.project_address), true)}
+        `)}
+        <p style="margin-top: 16px; font-size: 13px; color: #555;">The calendar has been updated and the old window is open again.</p>`),
     });
     await resend.emails.send({
       from: MAIL_FROM,
       to: booking.customer_email,
       replyTo: OWNER_EMAIL,
-      subject: `Rescheduled: your site visit is now ${date}, ${win.label}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1c1c1c; border-bottom: 2px solid #b8965a; padding-bottom: 8px;">You're rescheduled.</h2>
-          <p style="color: #1c1c1c;">Your new arrival window is <strong>${date}, ${win.label}</strong>.
-          Your calendar invitation updates automatically. As always, we'll call before we head your way.</p>
-        </div>`,
+      subject: `RESCHEDULED: your site visit is now ${date}, ${win.label}`,
+      html: emailShell(origin, `
+        ${heading("Your visit has been RESCHEDULED.")}
+        <p style="color: ${CHARCOAL}; font-size: 15px;">Please note the change so there's no confusion on the day:</p>
+        ${table(`
+          ${row("Old window", `<span style="text-decoration: line-through; color: #888;">${oldDate}<br/>${oldLabel}</span>`, true)}
+          ${row("NEW window", `<span style="background: ${CREAM}; border-left: 4px solid ${GOLD}; padding: 6px 10px; display: inline-block;"><strong style="font-size: 16px;">${date}</strong><br/><strong style="font-size: 16px;">${win.label}</strong></span>`)}
+        `)}
+        <p style="margin-top: 16px; color: ${CHARCOAL};">Your calendar invitation updates automatically, and as always, we'll call before we head your way.</p>`),
     });
   } catch { /* moves already happened */ }
 
   return res.status(200).json({ success: true, date, windowLabel: win.label });
+}
+
+function siteOrigin(req: VercelRequest): string {
+  const host = (req.headers["x-forwarded-host"] as string) || (req.headers.host as string) || "www.belvederedecks.com";
+  return `https://${host}`;
 }

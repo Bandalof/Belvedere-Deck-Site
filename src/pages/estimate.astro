@@ -54,7 +54,7 @@ import { brand } from '../config/brand';
             <button type="button" id="next-month" aria-label="Next month">›</button>
           </div>
           <div class="cal-grid" id="cal-grid"></div>
-          <p class="hint">You book a 2-hour arrival window — we call before heading your way. Weekdays 8 AM–7 PM · Saturdays 8 AM–4 PM · Book by the day before.</p>
+          <p class="hint">You book a 2-hour arrival window, and we call before heading your way. Weekdays 8 AM-7 PM · Saturdays 8 AM-4 PM · Book by the day before.</p>
           <div class="slots" id="slots"></div>
 
           <form id="booking-form" class="contact" style="margin-top: 20px;">
@@ -116,7 +116,7 @@ import { brand } from '../config/brand';
     const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
     const msg = document.getElementById('form-msg')!;
 
-    // "Today" in the shop's timezone (ET) — nothing same-day is bookable.
+    // "Today" in the shop's timezone (ET) - nothing same-day is bookable.
     const todayKey = todayKeyET();
     const today = new Date(todayKey + 'T12:00:00');
     viewYear = today.getFullYear();
@@ -243,7 +243,7 @@ import { brand } from '../config/brand';
         const body = await res.json().catch(() => ({}));
         if (res.ok) {
           (booked[selectedDateKey] ||= []).push(selectedWindowId);
-          show('ok', `You're booked: ${human}, arrival window ${windowLabel}. Check your email for your confirmation and calendar invite — and remember, we always call before heading your way.`);
+          show('ok', `You're booked: ${human}, arrival window ${windowLabel}. Check your email for your confirmation and calendar invite - and remember, we always call before heading your way.`);
           form.reset();
           selectedDateKey = null; selectedWindowId = null; selectedWindowLabel = null;
           renderCalendar(); renderSlots(); updateSubmit();

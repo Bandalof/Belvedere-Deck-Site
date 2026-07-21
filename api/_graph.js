@@ -127,7 +127,7 @@ export async function windowIsFree(dateKey, win) {
 function eventBody(i) {
   return {
     transactionId: i.transactionId,
-    subject: `Site visit: ${i.customerName} — ${i.service}`,
+    subject: `Site visit: ${i.customerName} - ${i.service}`,
     body: {
       contentType: "text",
       content:
@@ -173,6 +173,27 @@ export async function moveBookingEvent(eventId, dateKey, win) {
     },
   );
   if (!res.ok) throw new Error(`Event move failed (${res.status})`);
+}
+
+/**
+ * Where does this event live right now? Used to reconcile the database with
+ * the calendar after Austin drags or deletes a booking directly in Outlook.
+ * Returns { dateKey, startHour } in ET, or null if the event is gone/cancelled.
+ * @param {string} eventId
+ * @returns {Promise<{ dateKey: string, startHour: number } | null>}
+ */
+export async function getEventTimes(eventId) {
+  const res = await graphFetch(
+    `/users/${encodeURIComponent(BOOKING_CALENDAR)}/events/${encodeURIComponent(eventId)}?$select=start,isCancelled`,
+    { headers: { Prefer: `outlook.timezone="${BOOKING_TZ}"` } },
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Event lookup failed (${res.status})`);
+  const data = await res.json();
+  if (data.isCancelled) return null;
+  const dt = String(data.start && data.start.dateTime || "");
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}/.test(dt)) return null;
+  return { dateKey: dt.slice(0, 10), startHour: Number(dt.slice(11, 13)) };
 }
 
 /** Cancel an event; Exchange emails the attendee the cancellation automatically.

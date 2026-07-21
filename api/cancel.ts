@@ -3,8 +3,9 @@ import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
 import { windowById, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule.js";
 import { cancelBookingEvent, graphConfigured } from "./_graph.js";
+import { emailShell, heading, row, table, CHARCOAL } from "./_email.js";
 
-// POST /api/cancel {bid, t} — token-gated customer self-cancellation.
+// POST /api/cancel {bid, t} - token-gated customer self-cancellation.
 // Frees the slot, cancels the calendar meeting (Exchange notifies the
 // customer), and emails both sides.
 
@@ -37,7 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "Could not look up the booking." });
   }
   if (!booking) {
-    return res.status(404).json({ error: "Booking not found. The link may be outdated — call us and we'll sort it out." });
+    return res.status(404).json({ error: "Booking not found. The link may be outdated - call us and we'll sort it out." });
   }
 
   const dateKey = new Date(booking.booking_date).toISOString().split("T")[0];
@@ -57,26 +58,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const date = humanDate(dateKey);
+  const origin = `https://${(req.headers["x-forwarded-host"] as string) || (req.headers.host as string) || "www.belvederedecks.com"}`;
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: MAIL_FROM,
       to: OWNER_EMAIL,
       subject: `Cancelled: ${booking.customer_name}, ${date}, ${win.label}`,
-      html: `<p style="font-family: Arial, sans-serif;">${booking.customer_name} cancelled their visit
-        (${date}, ${win.label} at ${booking.project_address}). The window is open again.</p>`,
+      html: emailShell(origin, `
+        ${heading("Booking Cancelled")}
+        ${table(`
+          ${row("Customer", String(booking.customer_name))}
+          ${row("Was", `${date}, ${win.label}`, true)}
+          ${row("Address", String(booking.project_address))}
+        `)}
+        <p style="margin-top: 16px; font-size: 13px; color: #555;">The window is open again on the site.</p>`),
     });
     await resend.emails.send({
       from: MAIL_FROM,
       to: booking.customer_email,
       replyTo: OWNER_EMAIL,
       subject: `Cancelled: your site visit on ${date}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1c1c1c; border-bottom: 2px solid #b8965a; padding-bottom: 8px;">Your visit is cancelled.</h2>
-          <p style="color: #1c1c1c;">Your ${date} appointment (${win.label}) has been cancelled — no charge, no hard feelings.
-          When you're ready to talk decks again, book any time at our website.</p>
-        </div>`,
+      html: emailShell(origin, `
+        ${heading("Your visit is cancelled.")}
+        <p style="color: ${CHARCOAL};">Your ${date} appointment (${win.label}) has been cancelled. No charge, no hard feelings.
+        When you're ready to talk decks again, book any time at our website.</p>`),
     });
   } catch { /* cancellation already done */ }
 
