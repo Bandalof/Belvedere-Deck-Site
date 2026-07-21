@@ -6,8 +6,9 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description: string;
+  noindex?: boolean;
 }
-const { title, description } = Astro.props;
+const { title, description, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, brand.domain).href;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
@@ -73,7 +74,7 @@ const schema = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    {!brand.launched && <meta name="robots" content="noindex, nofollow" />}
+    {(!brand.launched || noindex) && <meta name="robots" content="noindex, nofollow" />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

@@ -54,7 +54,7 @@ import { brand } from '../config/brand';
             <button type="button" id="next-month" aria-label="Next month">›</button>
           </div>
           <div class="cal-grid" id="cal-grid"></div>
-          <p class="hint">Weekdays 9 AM–4 PM · Saturdays 9 AM–12 PM · Times shown are open right now.</p>
+          <p class="hint">You book a 2-hour arrival window — we call before heading your way. Weekdays 8 AM–7 PM · Saturdays 8 AM–4 PM · Book by the day before.</p>
           <div class="slots" id="slots"></div>
 
           <form id="booking-form" class="contact" style="margin-top: 20px;">
@@ -98,15 +98,16 @@ import { brand } from '../config/brand';
   </section>
 
   <script>
-    const WEEKDAY_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM'];
-    const SATURDAY_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM'];
+    import { windowsFor, todayKeyET } from '../lib/schedule';
+
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const DOWS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
     let viewYear: number, viewMonth: number;
     let selectedDateKey: string | null = null;
-    let selectedTime: string | null = null;
-    let booked: Record<string, string[]> = {};
+    let selectedWindowId: string | null = null;
+    let selectedWindowLabel: string | null = null;
+    let booked: Record<string, string[]> = {}; // unavailable window ids per date (DB + calendar busy)
 
     const grid = document.getElementById('cal-grid')!;
     const slotsEl = document.getElementById('slots')!;
@@ -115,23 +116,19 @@ import { brand } from '../config/brand';
     const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
     const msg = document.getElementById('form-msg')!;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // "Today" in the shop's timezone (ET) — nothing same-day is bookable.
+    const todayKey = todayKeyET();
+    const today = new Date(todayKey + 'T12:00:00');
     viewYear = today.getFullYear();
     viewMonth = today.getMonth();
 
     function key(y: number, m: number, d: number) {
       return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     }
-    function baseSlots(dateKey: string): string[] {
-      const day = new Date(dateKey + 'T12:00:00').getDay();
-      if (day === 0) return [];
-      if (day === 6) return SATURDAY_SLOTS;
-      return WEEKDAY_SLOTS;
-    }
-    function openSlots(dateKey: string): string[] {
+    function openWindows(dateKey: string) {
+      if (dateKey <= todayKey) return []; // book by the day before
       const taken = booked[dateKey] || [];
-      return baseSlots(dateKey).filter((s) => !taken.includes(s));
+      return windowsFor(dateKey).filter((w) => !taken.includes(w.id));
     }
 
     async function fetchMonth(y: number, m: number) {
@@ -159,17 +156,17 @@ import { brand } from '../config/brand';
         btn.className = 'day';
         btn.textContent = String(d);
         const dk = key(viewYear, viewMonth, d);
-        const dateObj = new Date(viewYear, viewMonth, d);
-        const past = dateObj < today;
-        const noSlots = openSlots(dk).length === 0;
-        if (past || noSlots) {
+        const notBookable = dk <= todayKey;
+        const noWindows = openWindows(dk).length === 0;
+        if (notBookable || noWindows) {
           btn.disabled = true;
-          if (!past && noSlots && baseSlots(dk).length > 0) btn.classList.add('full');
+          if (!notBookable && noWindows && windowsFor(dk).length > 0) btn.classList.add('full');
         }
         if (dk === selectedDateKey) btn.classList.add('selected');
         btn.addEventListener('click', () => {
           selectedDateKey = dk;
-          selectedTime = null;
+          selectedWindowId = null;
+          selectedWindowLabel = null;
           renderCalendar();
           renderSlots();
           updateSubmit();
@@ -183,13 +180,14 @@ import { brand } from '../config/brand';
     function renderSlots() {
       slotsEl.innerHTML = '';
       if (!selectedDateKey) return;
-      openSlots(selectedDateKey).forEach((slot) => {
+      openWindows(selectedDateKey).forEach((w) => {
         const b = document.createElement('button');
         b.type = 'button';
-        b.textContent = slot;
-        if (slot === selectedTime) b.classList.add('selected');
+        b.textContent = w.label;
+        if (w.id === selectedWindowId) b.classList.add('selected');
         b.addEventListener('click', () => {
-          selectedTime = slot;
+          selectedWindowId = w.id;
+          selectedWindowLabel = w.label;
           renderSlots();
           updateSubmit();
         });
@@ -198,13 +196,13 @@ import { brand } from '../config/brand';
     }
 
     function updateSubmit() {
-      if (selectedDateKey && selectedTime) {
+      if (selectedDateKey && selectedWindowId) {
         submitBtn.disabled = false;
         const d = new Date(selectedDateKey + 'T12:00:00');
-        submitBtn.textContent = `Book ${MONTHS[d.getMonth()]} ${d.getDate()} at ${selectedTime}`;
+        submitBtn.textContent = `Book ${MONTHS[d.getMonth()]} ${d.getDate()}, ${selectedWindowLabel}`;
       } else {
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Pick a date & time above';
+        submitBtn.textContent = 'Pick a date & arrival window above';
       }
     }
 
@@ -224,11 +222,12 @@ import { brand } from '../config/brand';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!form.reportValidity() || !selectedDateKey || !selectedTime) return;
+      if (!form.reportValidity() || !selectedDateKey || !selectedWindowId) return;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Booking…';
       const d = new Date(selectedDateKey + 'T12:00:00');
       const human = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      const windowLabel = selectedWindowLabel;
       const data = new FormData(form);
       try {
         const res = await fetch('/api/book-appointment', {
@@ -238,15 +237,15 @@ import { brand } from '../config/brand';
             name: data.get('name'), email: data.get('email'), phone: data.get('phone'),
             address: data.get('address'), service: data.get('service'),
             description: data.get('description'),
-            date: human, time: selectedTime, dateKey: selectedDateKey,
+            windowId: selectedWindowId, dateKey: selectedDateKey,
           }),
         });
         const body = await res.json().catch(() => ({}));
         if (res.ok) {
-          (booked[selectedDateKey] ||= []).push(selectedTime);
-          show('ok', `You're booked for ${human} at ${selectedTime}. Check your email for the calendar invite. We'll confirm by phone within 24 hours.`);
+          (booked[selectedDateKey] ||= []).push(selectedWindowId);
+          show('ok', `You're booked: ${human}, arrival window ${windowLabel}. Check your email for your confirmation and calendar invite — and remember, we always call before heading your way.`);
           form.reset();
-          selectedDateKey = null; selectedTime = null;
+          selectedDateKey = null; selectedWindowId = null; selectedWindowLabel = null;
           renderCalendar(); renderSlots(); updateSubmit();
         } else if (res.status === 409) {
           show('err', body.error || 'That time was just taken. Please pick another slot.');

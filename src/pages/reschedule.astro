@@ -1,0 +1,256 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { brand } from '../config/brand';
+---
+<Layout
+  title="Manage Your Appointment | Belvedere Decks"
+  description="Reschedule or cancel your Belvedere Decks site visit."
+  noindex={true}
+>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">Your Appointment</p>
+      <h1 id="page-title">Manage your visit</h1>
+      <div class="rule"></div>
+      <p class="lead" id="summary">Looking up your appointment…</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div id="closed" style="display:none;" class="notice">
+        <strong>This appointment is locked in.</strong> Online changes close a few hours
+        before your window — we may already be on the road. Reply to your confirmation
+        email or call us and we'll sort it out together.
+      </div>
+
+      <div id="manager" style="display:none;">
+        <div class="booking">
+          <h2 style="margin-top: 0;">Pick a new date &amp; arrival window</h2>
+          <div class="cal-head">
+            <button type="button" id="prev-month" aria-label="Previous month">‹</button>
+            <span class="month" id="month-label"></span>
+            <button type="button" id="next-month" aria-label="Next month">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <p class="hint">You book a 2-hour arrival window — we call before heading your way. Weekdays 8 AM–7 PM · Saturdays 8 AM–4 PM · Book by the day before.</p>
+          <div class="slots" id="slots"></div>
+          <button class="btn primary" type="button" id="move-btn" disabled style="margin-top: 20px;">Pick a new date &amp; window above</button>
+          <div class="form-msg" id="form-msg"></div>
+
+          <hr style="margin: 32px 0; border: none; border-top: 1px solid #ddd;" />
+          <p style="font-size: 14px;">Can't make it work? You can cancel instead — no charge, no hard feelings.</p>
+          <button class="btn" type="button" id="cancel-btn">Cancel this appointment</button>
+          <button class="btn" type="button" id="cancel-confirm" style="display:none; background:#8b2222; color:#fff;">Yes — cancel my visit</button>
+        </div>
+      </div>
+
+      <div id="done" style="display:none;" class="notice"></div>
+    </div>
+  </section>
+
+  <script>
+    import { windowsFor, todayKeyET } from '../lib/schedule';
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DOWS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+    const params = new URLSearchParams(location.search);
+    const bid = params.get('bid') || '';
+    const t = params.get('t') || '';
+
+    const summary = document.getElementById('summary')!;
+    const manager = document.getElementById('manager')!;
+    const closed = document.getElementById('closed')!;
+    const done = document.getElementById('done')!;
+    const grid = document.getElementById('cal-grid')!;
+    const slotsEl = document.getElementById('slots')!;
+    const monthLabel = document.getElementById('month-label')!;
+    const moveBtn = document.getElementById('move-btn') as HTMLButtonElement;
+    const msg = document.getElementById('form-msg')!;
+    const cancelBtn = document.getElementById('cancel-btn') as HTMLButtonElement;
+    const cancelConfirm = document.getElementById('cancel-confirm') as HTMLButtonElement;
+
+    const todayKey = todayKeyET();
+    const today = new Date(todayKey + 'T12:00:00');
+    let viewYear = today.getFullYear();
+    let viewMonth = today.getMonth();
+    let selectedDateKey: string | null = null;
+    let selectedWindowId: string | null = null;
+    let selectedWindowLabel: string | null = null;
+    let booked: Record<string, string[]> = {};
+    let current: { dateKey: string; windowId: string } | null = null;
+
+    function key(y: number, m: number, d: number) {
+      return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+    function openWindows(dateKey: string) {
+      if (dateKey <= todayKey) return [];
+      const taken = booked[dateKey] || [];
+      return windowsFor(dateKey).filter((w) =>
+        !taken.includes(w.id) || (current && dateKey === current.dateKey && w.id === current.windowId));
+    }
+    async function fetchMonth(y: number, m: number) {
+      try {
+        const res = await fetch(`/api/bookings?month=${y}-${String(m + 1).padStart(2, '0')}`);
+        if (res.ok) booked = { ...booked, ...(await res.json()) };
+      } catch { /* base availability still renders */ }
+    }
+    function show(kind: 'ok' | 'err', text: string) {
+      msg.className = `form-msg ${kind}`;
+      msg.textContent = text;
+    }
+
+    function renderCalendar() {
+      monthLabel.textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+      grid.innerHTML = '';
+      DOWS.forEach((d) => {
+        const el = document.createElement('div');
+        el.className = 'dow';
+        el.textContent = d;
+        grid.appendChild(el);
+      });
+      const first = new Date(viewYear, viewMonth, 1);
+      for (let i = 0; i < first.getDay(); i++) grid.appendChild(document.createElement('div'));
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'day';
+        btn.textContent = String(d);
+        const dk = key(viewYear, viewMonth, d);
+        if (dk <= todayKey || openWindows(dk).length === 0) btn.disabled = true;
+        if (dk === selectedDateKey) btn.classList.add('selected');
+        btn.addEventListener('click', () => {
+          selectedDateKey = dk;
+          selectedWindowId = null; selectedWindowLabel = null;
+          renderCalendar(); renderSlots(); updateMove();
+        });
+        grid.appendChild(btn);
+      }
+      const prev = document.getElementById('prev-month') as HTMLButtonElement;
+      prev.disabled = viewYear === today.getFullYear() && viewMonth === today.getMonth();
+    }
+
+    function renderSlots() {
+      slotsEl.innerHTML = '';
+      if (!selectedDateKey) return;
+      openWindows(selectedDateKey).forEach((w) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = w.label;
+        if (w.id === selectedWindowId) b.classList.add('selected');
+        b.addEventListener('click', () => {
+          selectedWindowId = w.id; selectedWindowLabel = w.label;
+          renderSlots(); updateMove();
+        });
+        slotsEl.appendChild(b);
+      });
+    }
+
+    function updateMove() {
+      if (selectedDateKey && selectedWindowId) {
+        moveBtn.disabled = false;
+        const d = new Date(selectedDateKey + 'T12:00:00');
+        moveBtn.textContent = `Move to ${MONTHS[d.getMonth()]} ${d.getDate()}, ${selectedWindowLabel}`;
+      } else {
+        moveBtn.disabled = true;
+        moveBtn.textContent = 'Pick a new date & window above';
+      }
+    }
+
+    document.getElementById('prev-month')!.addEventListener('click', async () => {
+      viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+      await fetchMonth(viewYear, viewMonth); renderCalendar(); renderSlots();
+    });
+    document.getElementById('next-month')!.addEventListener('click', async () => {
+      viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+      await fetchMonth(viewYear, viewMonth); renderCalendar(); renderSlots();
+    });
+
+    moveBtn.addEventListener('click', async () => {
+      if (!selectedDateKey || !selectedWindowId) return;
+      moveBtn.disabled = true;
+      moveBtn.textContent = 'Moving…';
+      try {
+        const res = await fetch('/api/reschedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bid, t, dateKey: selectedDateKey, windowId: selectedWindowId }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (res.ok) {
+          manager.style.display = 'none';
+          done.style.display = 'block';
+          done.innerHTML = `<strong>You're rescheduled.</strong> New arrival window: ${body.date}, ${body.windowLabel}. A confirmation is on its way to your email, and your calendar invite updates automatically.`;
+          summary.textContent = `New arrival window: ${body.date}, ${body.windowLabel}.`;
+        } else {
+          show('err', body.error || 'Could not move the booking. Please try again or call us.');
+          if (res.status === 409) { await fetchMonth(viewYear, viewMonth); renderCalendar(); renderSlots(); }
+          updateMove();
+        }
+      } catch {
+        show('err', 'Something went wrong. Please try again or call us.');
+        updateMove();
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      cancelBtn.style.display = 'none';
+      cancelConfirm.style.display = 'inline-block';
+    });
+    cancelConfirm.addEventListener('click', async () => {
+      cancelConfirm.disabled = true;
+      cancelConfirm.textContent = 'Cancelling…';
+      try {
+        const res = await fetch('/api/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bid, t }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (res.ok) {
+          manager.style.display = 'none';
+          done.style.display = 'block';
+          done.innerHTML = `<strong>Your visit is cancelled.</strong> No charge, no hard feelings — book again any time.`;
+          summary.textContent = 'This appointment has been cancelled.';
+        } else {
+          cancelConfirm.disabled = false;
+          cancelConfirm.textContent = 'Yes — cancel my visit';
+          show('err', body.error || 'Could not cancel. Please call us.');
+        }
+      } catch {
+        cancelConfirm.disabled = false;
+        cancelConfirm.textContent = 'Yes — cancel my visit';
+        show('err', 'Something went wrong. Please call us.');
+      }
+    });
+
+    async function init() {
+      if (!bid || !t) {
+        summary.textContent = 'This link is incomplete. Please use the button in your confirmation email.';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/reschedule?bid=${encodeURIComponent(bid)}&t=${encodeURIComponent(t)}`);
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          summary.textContent = body.error || 'We could not find this appointment. Please call us.';
+          return;
+        }
+        current = { dateKey: body.dateKey, windowId: body.windowId };
+        summary.textContent = `Hi ${body.firstName} — your visit is currently ${body.date}, arrival window ${body.windowLabel}.`;
+        if (!body.changeable) {
+          closed.style.display = 'block';
+          return;
+        }
+        manager.style.display = 'block';
+        await fetchMonth(viewYear, viewMonth);
+        renderCalendar(); renderSlots(); updateMove();
+      } catch {
+        summary.textContent = 'We could not load this appointment right now. Please try again or call us.';
+      }
+    }
+    init();
+  </script>
+</Layout>
