@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { neon } from "@neondatabase/serverless";
-import { windowsFor, todayKeyET } from "../src/lib/schedule";
-import { blockedWindows, graphConfigured } from "./_graph";
+import { windowsFor, todayKeyET } from "../src/lib/schedule.js";
+import { blockedWindows, graphConfigured } from "./_graph.js";
 
 // GET /api/bookings?month=YYYY-MM
 // Returns { "YYYY-MM-DD": ["08:00", ...] } of UNAVAILABLE window ids for the

@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
-import { windowById, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule";
-import { cancelBookingEvent, graphConfigured } from "./_graph";
+import { windowById, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule.js";
+import { cancelBookingEvent, graphConfigured } from "./_graph.js";
 
 // POST /api/cancel {bid, t} — token-gated customer self-cancellation.
 // Frees the slot, cancels the calendar meeting (Exchange notifies the

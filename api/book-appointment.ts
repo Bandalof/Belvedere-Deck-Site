@@ -2,8 +2,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
 import { randomUUID } from "node:crypto";
-import { windowById, isBookableDate, humanDate } from "../src/lib/schedule";
-import { createBookingEvent, windowIsFree, graphConfigured, BOOKING_CALENDAR } from "./_graph";
+import { windowById, isBookableDate, humanDate } from "../src/lib/schedule.js";
+import { createBookingEvent, windowIsFree, graphConfigured, BOOKING_CALENDAR } from "./_graph.js";
 
 // Booking flow:
 // 1. Validate (window model, no same-day, job details required).

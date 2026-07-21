@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { neon } from "@neondatabase/serverless";
-import { todayKeyET } from "../src/lib/schedule";
-import { blockedWindows, getToken, graphConfigured, BOOKING_CALENDAR, FREEBUSY_CALENDARS } from "./_graph";
+import { todayKeyET } from "../src/lib/schedule.js";
+import { blockedWindows, getToken, graphConfigured, BOOKING_CALENDAR, FREEBUSY_CALENDARS } from "./_graph.js";
 
 // GET /api/health-calendar — the Monday-brief watchdog.
 // Verifies, from inside the system: credentials work, both calendars answer

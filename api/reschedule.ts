@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
-import { windowById, windowsFor, isBookableDate, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule";
-import { moveBookingEvent, windowIsFree, graphConfigured } from "./_graph";
+import { windowById, windowsFor, isBookableDate, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule.js";
+import { moveBookingEvent, windowIsFree, graphConfigured } from "./_graph.js";
 
 // GET  /api/reschedule?bid=..&t=..            -> booking summary (token-gated)
 // POST /api/reschedule {bid, t, dateKey, windowId} -> move the booking

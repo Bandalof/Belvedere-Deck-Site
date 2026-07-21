@@ -1,10 +1,11 @@
 // ============================================================
 // Microsoft Graph helper for the booking system.
 // App-only auth (client credentials) against the Belvedere
-// Booking System app registration. Files starting with "_"
-// are NOT deployed as standalone Vercel functions.
+// Booking System app registration. Plain JS so Vercel's ESM
+// runtime loads it directly; files starting with "_" are NOT
+// deployed as standalone functions.
 // ============================================================
-import { BOOKING_TZ, windowsFor, type BookingWindow } from "../src/lib/schedule";
+import { BOOKING_TZ, windowsFor } from "../src/lib/schedule.js";
 
 const TENANT = process.env.AZURE_TENANT_ID;
 const CLIENT_ID = process.env.AZURE_CLIENT_ID;
@@ -14,20 +15,21 @@ export const BOOKING_CALENDAR = process.env.BOOKING_CALENDAR || "schedule@belved
 export const FREEBUSY_CALENDARS = (process.env.FREEBUSY_CALENDARS || BOOKING_CALENDAR)
   .split(",").map((s) => s.trim()).filter(Boolean);
 
-export function graphConfigured(): boolean {
+export function graphConfigured() {
   return Boolean(TENANT && CLIENT_ID && CLIENT_SECRET);
 }
 
-let cachedToken: { token: string; expiresAt: number } | null = null;
+/** @type {{ token: string, expiresAt: number } | null} */
+let cachedToken = null;
 
-export async function getToken(): Promise<string> {
+export async function getToken() {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) return cachedToken.token;
   const res = await fetch(`https://login.microsoftonline.com/${TENANT}/oauth2/v2.0/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      client_id: CLIENT_ID!,
-      client_secret: CLIENT_SECRET!,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
       scope: "https://graph.microsoft.com/.default",
       grant_type: "client_credentials",
     }),
@@ -38,14 +40,14 @@ export async function getToken(): Promise<string> {
   return cachedToken.token;
 }
 
-async function graphFetch(path: string, init?: RequestInit): Promise<Response> {
+async function graphFetch(path, init) {
   const token = await getToken();
   return fetch(`https://graph.microsoft.com/v1.0${path}`, {
     ...init,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-      ...(init?.headers || {}),
+      ...(init && init.headers ? init.headers : {}),
     },
   });
 }
@@ -54,8 +56,10 @@ async function graphFetch(path: string, init?: RequestInit): Promise<Response> {
  * Free/busy for [startKey .. endKey] (inclusive), ET, across all
  * FREEBUSY_CALENDARS. Returns a map dateKey -> Set of blocked window ids.
  * A window is blocked if ANY calendar shows ANY non-free time inside it.
+ * @param {string} startKey @param {string} endKey
+ * @returns {Promise<Record<string, Set<string>>>}
  */
-export async function blockedWindows(startKey: string, endKey: string): Promise<Record<string, Set<string>>> {
+export async function blockedWindows(startKey, endKey) {
   const res = await graphFetch(`/users/${encodeURIComponent(BOOKING_CALENDAR)}/calendar/getSchedule`, {
     method: "POST",
     body: JSON.stringify({
@@ -70,8 +74,9 @@ export async function blockedWindows(startKey: string, endKey: string): Promise<
 
   // availabilityView: one char per 30-min slot from startTime, per schedule.
   // '0' = free; anything else (tentative/busy/oof) blocks.
-  const views: string[] = (data.value || []).map((s: any) => s.availabilityView || "");
-  const blocked: Record<string, Set<string>> = {};
+  const views = (data.value || []).map((s) => s.availabilityView || "");
+  /** @type {Record<string, Set<string>>} */
+  const blocked = {};
 
   const start = new Date(startKey + "T12:00:00");
   const end = new Date(endKey + "T12:00:00");
@@ -92,31 +97,34 @@ export async function blockedWindows(startKey: string, endKey: string): Promise<
         }
         return false;
       });
-      if (busy) (blocked[dateKey] ||= new Set()).add(w.id);
+      if (busy) (blocked[dateKey] || (blocked[dateKey] = new Set())).add(w.id);
     }
   }
   return blocked;
 }
 
-/** True if this specific window is free on every watched calendar. */
-export async function windowIsFree(dateKey: string, win: BookingWindow): Promise<boolean> {
+/** True if this specific window is free on every watched calendar.
+ * @param {string} dateKey @param {import("../src/lib/schedule.js").BookingWindow} win */
+export async function windowIsFree(dateKey, win) {
   const blocked = await blockedWindows(dateKey, dateKey);
-  return !blocked[dateKey]?.has(win.id);
+  return !(blocked[dateKey] && blocked[dateKey].has(win.id));
 }
 
-export interface BookingEventInput {
-  dateKey: string;
-  win: BookingWindow;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  address: string;
-  service: string;
-  description: string;
-  transactionId: string;
-}
+/**
+ * @typedef {Object} BookingEventInput
+ * @property {string} dateKey
+ * @property {import("../src/lib/schedule.js").BookingWindow} win
+ * @property {string} customerName
+ * @property {string} customerEmail
+ * @property {string} customerPhone
+ * @property {string} address
+ * @property {string} service
+ * @property {string} description
+ * @property {string} transactionId
+ */
 
-function eventBody(i: BookingEventInput): object {
+/** @param {BookingEventInput} i */
+function eventBody(i) {
   return {
     transactionId: i.transactionId,
     subject: `Site visit: ${i.customerName} — ${i.service}`,
@@ -138,19 +146,22 @@ function eventBody(i: BookingEventInput): object {
   };
 }
 
-/** Create the booking as a real meeting (customer = attendee). Returns the Graph event id. */
-export async function createBookingEvent(i: BookingEventInput): Promise<string> {
+/** Create the booking as a real meeting (customer = attendee). Returns the Graph event id.
+ * @param {BookingEventInput} i @returns {Promise<string>} */
+export async function createBookingEvent(i) {
   const res = await graphFetch(`/users/${encodeURIComponent(BOOKING_CALENDAR)}/events`, {
     method: "POST",
     body: JSON.stringify(eventBody(i)),
   });
   if (!res.ok) throw new Error(`Event create failed (${res.status}): ${await res.text()}`);
   const data = await res.json();
-  return data.id as string;
+  return data.id;
 }
 
-/** Move an existing event; Exchange emails the attendee the update automatically. */
-export async function moveBookingEvent(eventId: string, dateKey: string, win: BookingWindow): Promise<void> {
+/** Move an existing event; Exchange emails the attendee the update automatically.
+ * @param {string} eventId @param {string} dateKey
+ * @param {import("../src/lib/schedule.js").BookingWindow} win */
+export async function moveBookingEvent(eventId, dateKey, win) {
   const res = await graphFetch(
     `/users/${encodeURIComponent(BOOKING_CALENDAR)}/events/${encodeURIComponent(eventId)}`,
     {
@@ -164,8 +175,9 @@ export async function moveBookingEvent(eventId: string, dateKey: string, win: Bo
   if (!res.ok) throw new Error(`Event move failed (${res.status})`);
 }
 
-/** Cancel an event; Exchange emails the attendee the cancellation automatically. */
-export async function cancelBookingEvent(eventId: string): Promise<void> {
+/** Cancel an event; Exchange emails the attendee the cancellation automatically.
+ * @param {string} eventId */
+export async function cancelBookingEvent(eventId) {
   const res = await graphFetch(
     `/users/${encodeURIComponent(BOOKING_CALENDAR)}/events/${encodeURIComponent(eventId)}`,
     { method: "DELETE" },
