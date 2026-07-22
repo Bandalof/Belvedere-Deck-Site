@@ -11,16 +11,16 @@ export const CREAM = "#f5f2ee";
 
 /**
  * Wrap inner HTML in the branded shell: charcoal header with the
- * Belvedere Decks lockup, gold rule, white body (background untouched).
- * @param {string} origin absolute site origin for the hosted logo image
+ * company name set in type (no image; text renders crisply in every
+ * mail client and both color modes), gold rule, white body.
+ * @param {string} origin kept for signature compatibility; no longer used
  * @param {string} inner
  */
 export function emailShell(origin, inner) {
   return `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <div style="background: ${CHARCOAL}; padding: 20px 24px; border-radius: 6px 6px 0 0; border-bottom: 3px solid ${GOLD};">
-      <img src="${origin}/images/email/logo.png" width="233" height="50" alt="Belvedere Decks"
-           style="display: block; border: 0; max-width: 233px; height: auto;" />
+    <div style="background: ${CHARCOAL}; padding: 24px; border-radius: 6px 6px 0 0; border-bottom: 3px solid ${GOLD};">
+      <span style="font-family: Georgia, 'Times New Roman', serif; font-size: 30px; line-height: 1.1; letter-spacing: 0.5px; color: ${CREAM};">Belvedere Decks</span>
     </div>
     <div style="padding: 8px 4px 0 4px;">
       ${inner}

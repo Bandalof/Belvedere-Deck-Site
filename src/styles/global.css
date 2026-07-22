@@ -104,9 +104,14 @@ header.topbar button {
 @media (min-width: 1024px) { header.topbar #menu-btn { display: none; } }
 main.content { padding-top: 72px; }
 @media (min-width: 1024px) { main.content { padding-top: 0; } }
-/* floating estimate CTA - desktop only, replaces the old white top bar */
-.floating-cta { position: fixed; top: 20px; right: 28px; z-index: 45; }
-@media (max-width: 1023.9px) { .floating-cta { display: none; } }
+/* floating estimate CTA - desktop only, replaces the old white top bar.
+   Hidden by DEFAULT and only shown at desktop widths: the old max-width
+   hide rule leaked through on iPhone, stacking this behind the topbar
+   button as a double rectangle. Default-off cannot leak. */
+.floating-cta { display: none; }
+@media (min-width: 1024px) {
+  .floating-cta { display: inline-flex; position: fixed; top: 20px; right: 28px; z-index: 45; }
+}
 @media (max-width: 1023.9px) {
   aside.sidebar { transform: translateX(-100%); }
   body.nav-open aside.sidebar { transform: translateX(0); box-shadow: var(--shadow-medium); }
