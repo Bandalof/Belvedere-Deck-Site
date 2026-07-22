@@ -20,10 +20,12 @@ functions in `api/`:
 - Customers book a 2-hour ARRIVAL WINDOW (weekdays 8-10 / 11-1 / 2-4 / 5-7,
   Saturdays 8-10 / 11-1 / 2-4, Sundays closed, nothing same-day, all Eastern).
   Window definitions live in ONE place: `src/lib/schedule.js`.
-- Availability = database reservations + live free/busy from Microsoft 365
+- Availability = database reservations + live calendar reads from Microsoft 365
   (`schedule@belvederedecks.com` AND `austin@belvederedecks.com`). Any event on
-  either calendar blocks the overlapping windows automatically; blocking time
-  means creating a calendar event, nothing more.
+  either calendar not marked "Show as: Free" blocks the overlapping windows
+  automatically; blocking time means creating a calendar event, nothing more.
+  (Implementation note: the site reads real events via Graph calendarView, not
+  getSchedule; Exchange's free/busy cache proved unreliable for austin@.)
 - A booking becomes a real calendar meeting on schedule@ with the customer
   invited. Dragging it in Outlook reschedules it: Exchange emails the customer
   the update, and `/api/bookings` self-heals the database row so the old window

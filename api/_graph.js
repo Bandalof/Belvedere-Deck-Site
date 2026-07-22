@@ -5,7 +5,7 @@
 // runtime loads it directly; files starting with "_" are NOT
 // deployed as standalone functions.
 // ============================================================
-import { BOOKING_TZ, windowsFor } from "../src/lib/schedule.js";
+import { BOOKING_TZ, windowsFor, etToUtc } from "../src/lib/schedule.js";
 
 const TENANT = process.env.AZURE_TENANT_ID;
 const CLIENT_ID = process.env.AZURE_CLIENT_ID;
@@ -53,6 +53,9 @@ async function graphFetch(path, init) {
 }
 
 /**
+ * DEBUG ONLY (health-calendar ?date=): Exchange's cached free/busy view,
+ * kept for comparison against rawBusy. The live blocking path no longer
+ * uses this; getSchedule returned all-free for austin@ despite a Busy event.
  * Raw free/busy per calendar for [startKey .. endKey] (inclusive), ET.
  * Each calendar is queried DIRECTLY (its own mailbox as the target and the
  * only schedule) so no cross-mailbox free/busy sharing rules apply; the app
@@ -88,18 +91,66 @@ export async function rawSchedules(startKey, endKey) {
 }
 
 /**
+ * The events that actually block time, per calendar, for
+ * [startKey .. endKey] (inclusive), ET. Reads the REAL events via
+ * calendarView instead of trusting getSchedule, because Exchange's
+ * free/busy cache proved unreliable for austin@ (a confirmed Busy
+ * event kept reporting as all-free). calendarView reads the calendar
+ * itself, so what Outlook shows is what the site sees.
+ * Cancelled and "Show as: Free" events are filtered out here.
+ * Times come back as ET wall-clock strings (Prefer: outlook.timezone).
+ * @param {string} startKey @param {string} endKey
+ * @returns {Promise<{ calendar: string, events: { start: string, end: string, showAs: string }[], error: string | null }[]>}
+ */
+export async function rawBusy(startKey, endKey) {
+  const startISO = etToUtc(startKey, 0).toISOString();
+  const dayAfterEnd = new Date(new Date(endKey + "T12:00:00").getTime() + 86_400_000)
+    .toISOString().split("T")[0];
+  const endISO = etToUtc(dayAfterEnd, 0).toISOString();
+
+  return Promise.all(FREEBUSY_CALENDARS.map(async (cal) => {
+    try {
+      /** @type {{ start: string, end: string, showAs: string }[]} */
+      const events = [];
+      let path =
+        `/users/${encodeURIComponent(cal)}/calendarView` +
+        `?startDateTime=${encodeURIComponent(startISO)}&endDateTime=${encodeURIComponent(endISO)}` +
+        `&$select=start,end,showAs,isCancelled&$top=200`;
+      for (let page = 0; page < 10 && path; page++) {
+        const res = await graphFetch(path, {
+          headers: { Prefer: `outlook.timezone="${BOOKING_TZ}"` },
+        });
+        if (!res.ok) return { calendar: cal, events, error: `HTTP ${res.status}` };
+        const data = await res.json();
+        for (const e of data.value || []) {
+          if (e.isCancelled) continue;
+          if (String(e.showAs || "busy").toLowerCase() === "free") continue;
+          events.push({
+            start: String(e.start && e.start.dateTime || ""),
+            end: String(e.end && e.end.dateTime || ""),
+            showAs: String(e.showAs || "busy"),
+          });
+        }
+        const next = data["@odata.nextLink"];
+        path = next ? String(next).replace("https://graph.microsoft.com/v1.0", "") : "";
+      }
+      return { calendar: cal, events, error: null };
+    } catch (e) {
+      return { calendar: cal, events: [], error: String(e && e.message || e) };
+    }
+  }));
+}
+
+/**
  * Free/busy for [startKey .. endKey] (inclusive), ET, across all
  * FREEBUSY_CALENDARS. Returns a map dateKey -> Set of blocked window ids.
- * A window is blocked if ANY calendar shows ANY non-free time inside it.
+ * A window is blocked if ANY calendar has ANY non-free event overlapping it.
  * @param {string} startKey @param {string} endKey
  * @returns {Promise<Record<string, Set<string>>>}
  */
 export async function blockedWindows(startKey, endKey) {
-  const schedules = await rawSchedules(startKey, endKey);
-
-  // availabilityView: one char per 30-min slot from startTime, per schedule.
-  // '0' = free; anything else (tentative/busy/oof) blocks.
-  const views = schedules.map((s) => s.availabilityView || "");
+  const perCalendar = await rawBusy(startKey, endKey);
+  const events = perCalendar.flatMap((c) => c.events);
   /** @type {Record<string, Set<string>>} */
   const blocked = {};
 
@@ -113,15 +164,11 @@ export async function blockedWindows(startKey, endKey) {
     const wins = windowsFor(dateKey);
     if (!wins.length) continue;
     for (const w of wins) {
-      const chunkStart = i * 48 + w.startHour * 2;          // 48 half-hours per day
-      const chunkEnd = i * 48 + w.endHour * 2;
-      const busy = views.some((view) => {
-        for (let c = chunkStart; c < chunkEnd; c++) {
-          const ch = view[c];
-          if (ch && ch !== "0") return true;
-        }
-        return false;
-      });
+      // Event times and window bounds are both ET wall-clock ISO strings,
+      // zero-padded, so plain string comparison is a correct overlap test.
+      const wStart = `${dateKey}T${String(w.startHour).padStart(2, "0")}:00:00`;
+      const wEnd = `${dateKey}T${String(w.endHour).padStart(2, "0")}:00:00`;
+      const busy = events.some((ev) => ev.start && ev.end && ev.start < wEnd && ev.end > wStart);
       if (busy) (blocked[dateKey] || (blocked[dateKey] = new Set())).add(w.id);
     }
   }
