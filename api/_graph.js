@@ -53,6 +53,41 @@ async function graphFetch(path, init) {
 }
 
 /**
+ * Raw free/busy per calendar for [startKey .. endKey] (inclusive), ET.
+ * Each calendar is queried DIRECTLY (its own mailbox as the target and the
+ * only schedule) so no cross-mailbox free/busy sharing rules apply; the app
+ * permission alone decides. Returns one entry per calendar with the
+ * availabilityView string and any per-schedule error Microsoft reported.
+ * @param {string} startKey @param {string} endKey
+ * @returns {Promise<{ calendar: string, availabilityView: string, error: string | null }[]>}
+ */
+export async function rawSchedules(startKey, endKey) {
+  return Promise.all(FREEBUSY_CALENDARS.map(async (cal) => {
+    try {
+      const res = await graphFetch(`/users/${encodeURIComponent(cal)}/calendar/getSchedule`, {
+        method: "POST",
+        body: JSON.stringify({
+          schedules: [cal],
+          startTime: { dateTime: `${startKey}T00:00:00`, timeZone: BOOKING_TZ },
+          endTime: { dateTime: `${endKey}T23:59:59`, timeZone: BOOKING_TZ },
+          availabilityViewInterval: 30,
+        }),
+      });
+      if (!res.ok) return { calendar: cal, availabilityView: "", error: `HTTP ${res.status}` };
+      const data = await res.json();
+      const entry = (data.value || [])[0] || {};
+      return {
+        calendar: cal,
+        availabilityView: entry.availabilityView || "",
+        error: entry.error ? String(entry.error.responseCode || entry.error.message || "unknown") : null,
+      };
+    } catch (e) {
+      return { calendar: cal, availabilityView: "", error: String(e && e.message || e) };
+    }
+  }));
+}
+
+/**
  * Free/busy for [startKey .. endKey] (inclusive), ET, across all
  * FREEBUSY_CALENDARS. Returns a map dateKey -> Set of blocked window ids.
  * A window is blocked if ANY calendar shows ANY non-free time inside it.
@@ -60,21 +95,11 @@ async function graphFetch(path, init) {
  * @returns {Promise<Record<string, Set<string>>>}
  */
 export async function blockedWindows(startKey, endKey) {
-  const res = await graphFetch(`/users/${encodeURIComponent(BOOKING_CALENDAR)}/calendar/getSchedule`, {
-    method: "POST",
-    body: JSON.stringify({
-      schedules: FREEBUSY_CALENDARS,
-      startTime: { dateTime: `${startKey}T00:00:00`, timeZone: BOOKING_TZ },
-      endTime: { dateTime: `${endKey}T23:59:59`, timeZone: BOOKING_TZ },
-      availabilityViewInterval: 30,
-    }),
-  });
-  if (!res.ok) throw new Error(`getSchedule failed (${res.status})`);
-  const data = await res.json();
+  const schedules = await rawSchedules(startKey, endKey);
 
   // availabilityView: one char per 30-min slot from startTime, per schedule.
   // '0' = free; anything else (tentative/busy/oof) blocks.
-  const views = (data.value || []).map((s) => s.availabilityView || "");
+  const views = schedules.map((s) => s.availabilityView || "");
   /** @type {Record<string, Set<string>>} */
   const blocked = {};
 

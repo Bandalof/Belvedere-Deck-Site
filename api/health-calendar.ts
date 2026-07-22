@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { neon } from "@neondatabase/serverless";
 import { todayKeyET } from "../src/lib/schedule.js";
-import { blockedWindows, getToken, graphConfigured, BOOKING_CALENDAR, FREEBUSY_CALENDARS } from "./_graph.js";
+import { blockedWindows, rawSchedules, getToken, graphConfigured, BOOKING_CALENDAR, FREEBUSY_CALENDARS } from "./_graph.js";
 
 // GET /api/health-calendar - the Monday-brief watchdog.
 // Verifies, from inside the system: credentials work, both calendars answer
@@ -30,11 +30,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // 3. Does free/busy answer for the watched calendars?
+  // 3. Does free/busy answer for EVERY watched calendar? A per-calendar
+  //    error means that mailbox's events silently stop blocking the site,
+  //    so it is a hard failure, not a shrug.
+  let debug: unknown = undefined;
   if (graphConfigured() && !issues.some((i) => i.startsWith("Microsoft sign-in"))) {
     try {
       const today = todayKeyET();
-      await blockedWindows(today, today);
+      const schedules = await rawSchedules(today, today);
+      for (const s of schedules) {
+        if (s.error) issues.push(`Free/busy failed for ${s.calendar}: ${s.error}. Events on that calendar are NOT blocking the site.`);
+        else if (!s.availabilityView) issues.push(`Free/busy for ${s.calendar} returned no data.`);
+      }
+      // Optional deep-debug: /api/health-calendar?date=YYYY-MM-DD shows the
+      // raw per-calendar availability strings plus the computed blocks.
+      const date = typeof req.query.date === "string" ? req.query.date : "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        const raw = await rawSchedules(date, date);
+        const blocked = await blockedWindows(date, date);
+        debug = {
+          date,
+          schedules: raw,
+          blockedWindows: Object.fromEntries(Object.entries(blocked).map(([k, v]) => [k, [...v]])),
+        };
+      }
     } catch {
       issues.push(`Free/busy lookup failed for ${FREEBUSY_CALENDARS.join(", ")} - check the ${BOOKING_CALENDAR} mailbox and app permissions.`);
     }
@@ -56,5 +75,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     issues,
     watching: FREEBUSY_CALENDARS,
     checkedAt: new Date().toISOString(),
+    ...(debug !== undefined ? { debug } : {}),
   });
 }
