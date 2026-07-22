@@ -55,3 +55,39 @@ export function button(href, label) {
     <a href="${href}" style="background: ${GOLD}; color: ${CHARCOAL}; padding: 13px 26px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">${label}</a>
   </p>`;
 }
+
+/**
+ * The branded "Booking Rescheduled" owner + customer pair. ONE source of
+ * truth, used by both reschedule paths: the customer's self-service page
+ * AND the reconciler that notices Austin dragging the event in Outlook.
+ * @param {{ origin: string, customerName: string, address: string,
+ *           oldDate: string, oldLabel: string, newDate: string, newLabel: string,
+ *           ownerNote: string }} i
+ * @returns {{ owner: { subject: string, html: string }, customer: { subject: string, html: string } }}
+ */
+export function rescheduleEmailPair(i) {
+  const owner = {
+    subject: `Rescheduled: ${i.customerName} moved to ${i.newDate}, ${i.newLabel}`,
+    html: emailShell(i.origin, `
+        ${heading("Booking Rescheduled")}
+        ${table(`
+          ${row("Customer", i.customerName)}
+          ${row("Old window", `<span style="text-decoration: line-through; color: #888;">${i.oldDate}, ${i.oldLabel}</span>`, true)}
+          ${row("New window", `<strong>${i.newDate}, ${i.newLabel}</strong>`)}
+          ${row("Address", i.address, true)}
+        `)}
+        <p style="margin-top: 16px; font-size: 13px; color: #555;">${i.ownerNote}</p>`),
+  };
+  const customer = {
+    subject: `RESCHEDULED: your site visit is now ${i.newDate}, ${i.newLabel}`,
+    html: emailShell(i.origin, `
+        ${heading("Your visit has been RESCHEDULED.")}
+        <p style="color: ${CHARCOAL}; font-size: 15px;">Please note the change so there's no confusion on the day:</p>
+        ${table(`
+          ${row("Old window", `<span style="text-decoration: line-through; color: #888;">${i.oldDate}<br/>${i.oldLabel}</span>`, true)}
+          ${row("NEW window", `<span style="background: ${CREAM}; border-left: 4px solid ${GOLD}; padding: 6px 10px; display: inline-block;"><strong style="font-size: 16px;">${i.newDate}</strong><br/><strong style="font-size: 16px;">${i.newLabel}</strong></span>`)}
+        `)}
+        <p style="margin-top: 16px; color: ${CHARCOAL};">Your calendar invitation updates automatically, and as always, we'll call before we head your way.</p>`),
+  };
+  return { owner, customer };
+}

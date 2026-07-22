@@ -1,0 +1,22 @@
+# Pings /api/reconcile every 15 minutes so that when Austin drags or
+# deletes a booking directly in Outlook, the website notices quickly:
+# the database row follows the calendar (old window reopens) and the
+# branded reschedule emails go out to the owner and the customer.
+# Backstops if this ever stops: every /api/bookings call (any estimate
+# page view) runs the same reconciler, and the Monday brief checks
+# /api/health-calendar. NOTE: GitHub pauses scheduled workflows after
+# 60 days with no repo activity; any push re-enables it.
+name: Reconcile bookings with the calendar
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+permissions: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping the reconcile endpoint
+        run: |
+          curl -fsS --max-time 60 "https://belvedere-deck-site.vercel.app/api/reconcile"

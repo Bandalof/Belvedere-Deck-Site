@@ -28,8 +28,14 @@ functions in `api/`:
   getSchedule; Exchange's free/busy cache proved unreliable for austin@.)
 - A booking becomes a real calendar meeting on schedule@ with the customer
   invited. Dragging it in Outlook reschedules it: Exchange emails the customer
-  the update, and `/api/bookings` self-heals the database row so the old window
-  reopens on the site.
+  the updated invite, and the reconciler (`api/_reconcile.js`) moves the
+  database row so the old window reopens AND sends the branded reschedule
+  emails to both the owner and the customer (exact times, even for
+  off-window drags). It runs on every `/api/bookings` call and via
+  `/api/reconcile`, which a GitHub Actions workflow pings every 15 minutes
+  (`.github/workflows/reconcile.yml`; GitHub pauses it after 60 days of repo
+  inactivity, any push re-enables). Deleting the event in Outlook frees the
+  window; Exchange sends the customer the cancellation itself.
 - Customers self-serve reschedule/cancel via a tokenized link in their
   confirmation email (`/reschedule?bid=..&t=..`), cutoff 4 hours before the
   window. Emails are branded (charcoal header, gold rule, hosted logo at
@@ -55,6 +61,7 @@ go in `/api/setup-db` (idempotent; hit it once after deploying a migration).
     npm install
     npm run dev       # local preview
     npm run build     # output in dist/
+    node _test_reconcile.mjs   # offline test of the drag-reschedule reconciler
 
 ## Deploy (Vercel)
 Vercel project: belvedere-deck-site (auto-deploys from main).

@@ -250,13 +250,14 @@ export async function moveBookingEvent(eventId, dateKey, win) {
 /**
  * Where does this event live right now? Used to reconcile the database with
  * the calendar after Austin drags or deletes a booking directly in Outlook.
- * Returns { dateKey, startHour } in ET, or null if the event is gone/cancelled.
+ * Returns the event's ET start and end (with minutes, so emails can state
+ * exact times even for off-window drags), or null if it is gone/cancelled.
  * @param {string} eventId
- * @returns {Promise<{ dateKey: string, startHour: number } | null>}
+ * @returns {Promise<{ dateKey: string, startHour: number, startMinute: number, endHour: number, endMinute: number } | null>}
  */
 export async function getEventTimes(eventId) {
   const res = await graphFetch(
-    `/users/${encodeURIComponent(BOOKING_CALENDAR)}/events/${encodeURIComponent(eventId)}?$select=start,isCancelled`,
+    `/users/${encodeURIComponent(BOOKING_CALENDAR)}/events/${encodeURIComponent(eventId)}?$select=start,end,isCancelled`,
     { headers: { Prefer: `outlook.timezone="${BOOKING_TZ}"` } },
   );
   if (res.status === 404) return null;
@@ -264,8 +265,18 @@ export async function getEventTimes(eventId) {
   const data = await res.json();
   if (data.isCancelled) return null;
   const dt = String(data.start && data.start.dateTime || "");
-  if (!/^\d{4}-\d{2}-\d{2}T\d{2}/.test(dt)) return null;
-  return { dateKey: dt.slice(0, 10), startHour: Number(dt.slice(11, 13)) };
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dt)) return null;
+  const et = String(data.end && data.end.dateTime || "");
+  const hasEnd = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(et);
+  const startHour = Number(dt.slice(11, 13));
+  const startMinute = Number(dt.slice(14, 16));
+  return {
+    dateKey: dt.slice(0, 10),
+    startHour,
+    startMinute,
+    endHour: hasEnd ? Number(et.slice(11, 13)) : startHour + 2,
+    endMinute: hasEnd ? Number(et.slice(14, 16)) : startMinute,
+  };
 }
 
 /** Cancel an event; Exchange emails the attendee the cancellation automatically.

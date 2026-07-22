@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
 import { windowById, isBookableDate, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule.js";
 import { moveBookingEvent, windowIsFree, graphConfigured } from "./_graph.js";
-import { emailShell, heading, row, table, CHARCOAL, GOLD, CREAM } from "./_email.js";
+import { rescheduleEmailPair } from "./_email.js";
 
 // GET  /api/reschedule?bid=..&t=..            -> booking summary (token-gated)
 // POST /api/reschedule {bid, t, dateKey, windowId} -> move the booking
@@ -122,34 +122,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = siteOrigin(req);
 
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: MAIL_FROM,
-      to: OWNER_EMAIL,
-      subject: `Rescheduled: ${booking.customer_name} moved to ${date}, ${win.label}`,
-      html: emailShell(origin, `
-        ${heading("Booking Rescheduled")}
-        ${table(`
-          ${row("Customer", String(booking.customer_name))}
-          ${row("Old window", `<span style="text-decoration: line-through; color: #888;">${oldDate}, ${oldLabel}</span>`, true)}
-          ${row("New window", `<strong>${date}, ${win.label}</strong>`)}
-          ${row("Address", String(booking.project_address), true)}
-        `)}
-        <p style="margin-top: 16px; font-size: 13px; color: #555;">The calendar has been updated and the old window is open again.</p>`),
+    const { owner, customer } = rescheduleEmailPair({
+      origin,
+      customerName: String(booking.customer_name),
+      address: String(booking.project_address),
+      oldDate, oldLabel,
+      newDate: date,
+      newLabel: win.label,
+      ownerNote: "The customer moved this from their reschedule link. The calendar has been updated and the old window is open again.",
     });
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({ from: MAIL_FROM, to: OWNER_EMAIL, subject: owner.subject, html: owner.html });
     await resend.emails.send({
       from: MAIL_FROM,
       to: booking.customer_email,
       replyTo: OWNER_EMAIL,
-      subject: `RESCHEDULED: your site visit is now ${date}, ${win.label}`,
-      html: emailShell(origin, `
-        ${heading("Your visit has been RESCHEDULED.")}
-        <p style="color: ${CHARCOAL}; font-size: 15px;">Please note the change so there's no confusion on the day:</p>
-        ${table(`
-          ${row("Old window", `<span style="text-decoration: line-through; color: #888;">${oldDate}<br/>${oldLabel}</span>`, true)}
-          ${row("NEW window", `<span style="background: ${CREAM}; border-left: 4px solid ${GOLD}; padding: 6px 10px; display: inline-block;"><strong style="font-size: 16px;">${date}</strong><br/><strong style="font-size: 16px;">${win.label}</strong></span>`)}
-        `)}
-        <p style="margin-top: 16px; color: ${CHARCOAL};">Your calendar invitation updates automatically, and as always, we'll call before we head your way.</p>`),
+      subject: customer.subject,
+      html: customer.html,
     });
   } catch { /* moves already happened */ }
 
