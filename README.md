@@ -35,7 +35,9 @@ functions in `api/`:
   `/api/reconcile`, which a GitHub Actions workflow pings every 15 minutes
   (`.github/workflows/reconcile.yml`; GitHub pauses it after 60 days of repo
   inactivity, any push re-enables). Deleting the event in Outlook frees the
-  window; Exchange sends the customer the cancellation itself.
+  window and sends the branded cancellation pair to the owner and the
+  customer (on top of Exchange's own invite cancellation). Cancellation
+  notices go to BOTH sides no matter who cancels, same as reschedules.
 - Customers self-serve reschedule/cancel via a tokenized link in their
   confirmation email (`/reschedule?bid=..&t=..`), cutoff 4 hours before the
   window. Emails are branded (charcoal header, gold rule, hosted logo at

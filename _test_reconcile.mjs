@@ -102,12 +102,27 @@ check("off-window: 2 emails with exact times",
   sentEmails.length === 2 && /9:15 AM - 10:45 AM/.test(sentEmails[1]?.subject || ""), sentEmails[1]?.subject);
 check("off-window: row released", table.length === 0);
 
-// 4. Event deleted in Outlook: row freed silently (Exchange sends the cancellation).
+// 4. Event deleted in Outlook: row freed AND branded cancellation pair sent.
 seed();
 liveEvent = null;
 r = await reconcileRange(makeSql(), "https://test", "2026-07-01", "2026-07-31");
-check("deleted: freed, no emails", r.freed === 1 && sentEmails.length === 0);
+check("deleted: freed=1, 2 emails", r.freed === 1 && sentEmails.length === 2, JSON.stringify(r));
+check("deleted: owner email first", sentEmails[0]?.to === "schedule@belvederedecks.com");
+check("deleted: customer subject has date",
+  /Cancelled: your site visit on Friday, July 24, 2026/.test(sentEmails[1]?.subject || ""), sentEmails[1]?.subject);
+check("deleted: owner subject has window",
+  /Cancelled: Test Customer, Friday, July 24, 2026, 11:00 AM - 1:00 PM/.test(sentEmails[0]?.subject || ""), sentEmails[0]?.subject);
 check("deleted: row gone", table.length === 0);
+
+// 4b. Two reconcilers race after one deletion: cancellation emailed exactly once.
+seed();
+liveEvent = null;
+const sqlDel = makeSql();
+await Promise.all([
+  reconcileRange(sqlDel, "https://test", "2026-07-01", "2026-07-31"),
+  reconcileRange(sqlDel, "https://test", "2026-07-01", "2026-07-31"),
+]);
+check("deleted race: exactly 2 emails total", sentEmails.length === 2, sentEmails.length);
 
 // 5. Two reconcilers race after one drag: emails sent exactly once.
 seed();

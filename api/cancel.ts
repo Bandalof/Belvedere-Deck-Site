@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
 import { windowById, beforeCutoff, humanDate, RESCHEDULE_CUTOFF_HOURS } from "../src/lib/schedule.js";
 import { cancelBookingEvent, graphConfigured } from "./_graph.js";
-import { emailShell, heading, row, table, CHARCOAL } from "./_email.js";
+import { cancelEmailPair } from "./_email.js";
 
 // POST /api/cancel {bid, t} - token-gated customer self-cancellation.
 // Frees the slot, cancels the calendar meeting (Exchange notifies the
@@ -60,29 +60,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const date = humanDate(dateKey);
   const origin = `https://${(req.headers["x-forwarded-host"] as string) || (req.headers.host as string) || "www.belvederedecks.com"}`;
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: MAIL_FROM,
-      to: OWNER_EMAIL,
-      subject: `Cancelled: ${booking.customer_name}, ${date}, ${win.label}`,
-      html: emailShell(origin, `
-        ${heading("Booking Cancelled")}
-        ${table(`
-          ${row("Customer", String(booking.customer_name))}
-          ${row("Was", `${date}, ${win.label}`, true)}
-          ${row("Address", String(booking.project_address))}
-        `)}
-        <p style="margin-top: 16px; font-size: 13px; color: #555;">The window is open again on the site.</p>`),
+    const { owner, customer } = cancelEmailPair({
+      origin,
+      customerName: String(booking.customer_name),
+      address: String(booking.project_address),
+      date,
+      label: win.label,
+      ownerNote: "The customer cancelled from their reschedule link. The window is open again on the site.",
     });
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({ from: MAIL_FROM, to: OWNER_EMAIL, subject: owner.subject, html: owner.html });
     await resend.emails.send({
       from: MAIL_FROM,
       to: booking.customer_email,
       replyTo: OWNER_EMAIL,
-      subject: `Cancelled: your site visit on ${date}`,
-      html: emailShell(origin, `
-        ${heading("Your visit is cancelled.")}
-        <p style="color: ${CHARCOAL};">Your ${date} appointment (${win.label}) has been cancelled. No charge, no hard feelings.
-        When you're ready to talk decks again, book any time at our website.</p>`),
+      subject: customer.subject,
+      html: customer.html,
     });
   } catch { /* cancellation already done */ }
 

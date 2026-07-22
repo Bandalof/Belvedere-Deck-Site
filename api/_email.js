@@ -91,3 +91,34 @@ export function rescheduleEmailPair(i) {
   };
   return { owner, customer };
 }
+
+/**
+ * The branded "Booking Cancelled" owner + customer pair. ONE source of
+ * truth, used by both cancellation paths: the customer's self-service
+ * page AND the reconciler that notices Austin deleting the event in
+ * Outlook. Sent no matter WHO cancels, so both sides always hear it.
+ * @param {{ origin: string, customerName: string, address: string,
+ *           date: string, label: string, ownerNote: string }} i
+ * @returns {{ owner: { subject: string, html: string }, customer: { subject: string, html: string } }}
+ */
+export function cancelEmailPair(i) {
+  const owner = {
+    subject: `Cancelled: ${i.customerName}, ${i.date}, ${i.label}`,
+    html: emailShell(i.origin, `
+        ${heading("Booking Cancelled")}
+        ${table(`
+          ${row("Customer", i.customerName)}
+          ${row("Was", `${i.date}, ${i.label}`, true)}
+          ${row("Address", i.address)}
+        `)}
+        <p style="margin-top: 16px; font-size: 13px; color: #555;">${i.ownerNote}</p>`),
+  };
+  const customer = {
+    subject: `Cancelled: your site visit on ${i.date}`,
+    html: emailShell(i.origin, `
+        ${heading("Your visit is cancelled.")}
+        <p style="color: ${CHARCOAL};">Your ${i.date} appointment (${i.label}) has been cancelled. No charge, no hard feelings.
+        When you're ready to talk decks again, book any time at our website.</p>`),
+  };
+  return { owner, customer };
+}

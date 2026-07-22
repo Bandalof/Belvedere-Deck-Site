@@ -12,7 +12,7 @@
 import { Resend } from "resend";
 import { windowsFor, windowById, humanDate } from "../src/lib/schedule.js";
 import { getEventTimes, graphConfigured } from "./_graph.js";
-import { rescheduleEmailPair } from "./_email.js";
+import { rescheduleEmailPair, cancelEmailPair } from "./_email.js";
 
 const MAIL_FROM = process.env.MAIL_FROM || "Belvedere Decks <schedule@belvederedecks.com>";
 const OWNER_EMAIL = process.env.OWNER_EMAIL || "schedule@belvederedecks.com";
@@ -22,6 +22,27 @@ function timeLabel(h, m) {
   const ap = h >= 12 ? "PM" : "AM";
   const h12 = ((h + 11) % 12) + 1;
   return `${h12}:${String(m).padStart(2, "0")} ${ap}`;
+}
+
+/** Send the branded cancellation pair; best effort, never throws.
+ * @param {{ origin: string, customerName: string, customerEmail: string, address: string,
+ *           date: string, label: string }} i */
+async function sendCancelPair(i) {
+  try {
+    const { owner, customer } = cancelEmailPair({
+      ...i,
+      ownerNote: "You removed this from the calendar. The customer has been emailed the cancellation, and the window is open again on the site.",
+    });
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({ from: MAIL_FROM, to: OWNER_EMAIL, subject: owner.subject, html: owner.html });
+    await resend.emails.send({
+      from: MAIL_FROM, to: i.customerEmail, replyTo: OWNER_EMAIL,
+      subject: customer.subject, html: customer.html,
+    });
+    return 2;
+  } catch {
+    return 0;
+  }
 }
 
 /** Send the branded pair; best effort, never throws.
@@ -79,16 +100,31 @@ export async function reconcileRange(sql, origin, startKey, endKey) {
     }
     try {
       const live = await getEventTimes(String(r.graph_event_id));
-      if (live === null) {
-        // Deleted/cancelled in Outlook: free the slot. Exchange already sent
-        // the customer the cancellation when the meeting was deleted.
-        await sql`DELETE FROM bookings WHERE id = ${r.id}`;
-        freed++;
-        return;
-      }
-
       const oldDate = humanDate(dbDateKey);
       const oldLabel = (windowById(dbDateKey, dbWindowId) || { label: dbWindowId }).label;
+
+      if (live === null) {
+        // Deleted/cancelled in Outlook: free the slot and send the branded
+        // cancellation pair (on top of Exchange's own invite cancellation).
+        // Guarded delete: exactly one reconciler run wins and emails.
+        const gone = await sql`
+          DELETE FROM bookings
+          WHERE id = ${r.id} AND booking_date = ${dbDateKey}::date AND booking_time = ${dbWindowId}
+          RETURNING id
+        `;
+        if (gone.length) {
+          freed++;
+          emailsSent += await sendCancelPair({
+            origin,
+            customerName: String(r.customer_name),
+            customerEmail: String(r.customer_email),
+            address: String(r.project_address),
+            date: oldDate,
+            label: oldLabel,
+          });
+        }
+        return;
+      }
       const liveWin = live.startMinute === 0
         ? windowsFor(live.dateKey).find((w) => w.startHour === live.startHour)
         : undefined;
