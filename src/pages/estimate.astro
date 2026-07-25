@@ -29,19 +29,22 @@ import { brand } from '../config/brand';
             <strong>Email:</strong> <a href={`mailto:${brand.email}`}>{brand.email}</a>
           </p>
           <p>
-            We respond to every inquiry the same day, usually within the hour. If we're
-            on a job site, you'll get a text back within minutes.
+            We answer calls and texts during business hours, weekdays 8 AM to 7 PM and
+            Saturdays 8 AM to 4 PM. If we are on a job site when you call, you will
+            still hear back the same day. Anything that comes in after hours gets an
+            answer the next business day, and if it is urgent, say so and we will move
+            you up.
           </p>
           <div class="notice">
-            <strong>What the visit looks like:</strong> about an hour. We walk the deck
-            together and tell you what we find, good and bad. Then we measure and build
-            your exact price on the iPad in front of you: every tier priced, plus our
-            recommendation, same visit. It
-            works best when everyone who weighs in on the decision can be there.
+            <strong>What the visit looks like:</strong> Expect about an hour. We walk
+            the deck together and tell you what we find, good and bad. Then we measure
+            and build your exact price on the iPad in front of you: every tier priced,
+            plus our recommendation, same visit. It works best when everyone who has a
+            say in the decision can be there.
           </div>
           <div class="notice">
-            <strong>Good to know:</strong> our projects start at $6,000. We don't take
-            on small repairs. And the details you give below are how we show up
+            <strong>Good to know:</strong> We do not take on small repairs, and our
+            projects start at $6,000. The details you give below are what let us arrive
             prepared: the right board samples, the right questions, and a realistic
             range before we ring the doorbell.
           </div>
@@ -55,7 +58,7 @@ import { brand } from '../config/brand';
             <button type="button" id="next-month" aria-label="Next month">›</button>
           </div>
           <div class="cal-grid" id="cal-grid"></div>
-          <p class="hint">You book a 2-hour arrival window, and we call before heading your way. Weekdays 8 AM-7 PM · Saturdays 8 AM-4 PM · Book by the day before.</p>
+          <p class="hint">You book a 2-hour arrival window, and we call before heading your way. Weekdays 8 AM to 7 PM · Saturdays 8 AM to 4 PM · Book by the day before.</p>
           <div class="slots" id="slots"></div>
 
           <form id="booking-form" class="contact" style="margin-top: 20px;">
@@ -90,7 +93,7 @@ import { brand } from '../config/brand';
               <textarea id="description" name="description" rows="4" required minlength="20"
                 placeholder="Rough size, age of the deck, what's bothering you about it, and what you're hoping for."></textarea>
             </div>
-            <button class="btn primary" type="submit" id="submit-btn" disabled>Pick a date &amp; time above</button>
+            <button class="btn primary" type="submit" id="submit-btn" disabled>Pick a date and arrival window above</button>
             <div class="form-msg" id="form-msg"></div>
           </form>
         </div>
@@ -203,7 +206,7 @@ import { brand } from '../config/brand';
         submitBtn.textContent = `Book ${MONTHS[d.getMonth()]} ${d.getDate()}, ${selectedWindowLabel}`;
       } else {
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Pick a date & arrival window above';
+        submitBtn.textContent = 'Pick a date and arrival window above';
       }
     }
 
@@ -244,7 +247,7 @@ import { brand } from '../config/brand';
         const body = await res.json().catch(() => ({}));
         if (res.ok) {
           (booked[selectedDateKey] ||= []).push(selectedWindowId);
-          show('ok', `You're booked: ${human}, arrival window ${windowLabel}. Check your email for your confirmation and calendar invite - and remember, we always call before heading your way.`);
+          show('ok', `You're booked: ${human}, arrival window ${windowLabel}. Check your email for your confirmation and calendar invite, and remember that we always call before heading your way.`);
           form.reset();
           selectedDateKey = null; selectedWindowId = null; selectedWindowLabel = null;
           renderCalendar(); renderSlots(); updateSubmit();

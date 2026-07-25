@@ -202,6 +202,16 @@ body.nav-open .scrim {
   box-shadow: var(--shadow-soft); transition: box-shadow 0.3s; border: none;
 }
 .card:hover { box-shadow: var(--shadow-medium); }
+/* card call-to-action link. The chevron is drawn with CSS borders rather than a
+   text arrow, so it can never trigger a font fallback the way U+2192 does. */
+.card-link { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; }
+.card-link::after {
+  content: ''; width: 0.38em; height: 0.38em; flex: none;
+  border-right: 2px solid currentColor; border-top: 2px solid currentColor;
+  transform: rotate(45deg); transition: transform 0.2s ease;
+}
+.card-link:hover::after { transform: translateX(3px) rotate(45deg); }
+
 .card .price { font-family: var(--serif); font-size: 1.6rem; font-weight: 400; color: var(--primary); margin: 8px 0; }
 
 .checklist { list-style: none; margin: 1rem 0; }
