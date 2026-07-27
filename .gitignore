@@ -2,3 +2,10 @@ node_modules/
 dist/
 .astro/
 .DS_Store
+
+# Secrets and local build state
+.env
+.env.*
+!.env.example
+.vercel/
+*.log
