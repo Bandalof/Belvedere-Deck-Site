@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /colors-catalog/
 
 Sitemap: https://www.belvederedecks.com/sitemap-index.xml

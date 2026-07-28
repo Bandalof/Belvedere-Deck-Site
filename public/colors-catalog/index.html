@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="theme-color" content="#1c1c1c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Deck Colors">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Belvedere Decks · Color Catalog</title>
+<style>
+:root{--charcoal:#1c1c1c;--gold:#b8965a;--cream:#f5f2ee;--ink:#222;--muted:#6b6b6b;--line:#e0ddd9;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+     background:var(--cream);color:var(--ink);line-height:1.5;
+     padding-top:env(safe-area-inset-top);}
+.topbar{position:sticky;top:0;z-index:30;}
+header{background:var(--charcoal);color:var(--cream);padding:16px 16px 13px;border-bottom:4px solid var(--gold);
+       display:flex;align-items:center;gap:12px;}
+header .ttl{flex:1;min-width:0;}
+header h1{font-family:Georgia,serif;font-size:20px;font-weight:600;letter-spacing:.4px;}
+header p{font-size:11px;color:#c9c3b8;margin-top:2px;}
+#status{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+        border:1px solid #4a4a4a;color:#9d9d9d;border-radius:11px;padding:3px 9px;white-space:nowrap;}
+#status.ok{border-color:var(--gold);color:var(--gold);}
+.searchwrap{background:#222;padding:8px 12px;}
+#q{width:100%;border:0;border-radius:9px;padding:10px 12px;font-size:15px;background:#333;color:#f2efe9;}
+#q::placeholder{color:#8d8d8d;}
+nav{background:#262626;display:flex;gap:6px;overflow-x:auto;padding:9px 12px;border-bottom:1px solid #333;-webkit-overflow-scrolling:touch;}
+nav::-webkit-scrollbar{display:none;}
+nav a{color:var(--cream);text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;
+      background:#333;padding:7px 12px;border-radius:20px;transition:background .15s,color .15s;}
+nav a.active{background:var(--gold);color:var(--charcoal);}
+.section{padding:22px 14px 6px;}
+.section h2{font-family:Georgia,serif;font-size:20px;color:var(--charcoal);border-bottom:2px solid var(--gold);padding-bottom:6px;}
+.section .lead{font-size:13px;color:var(--muted);margin:8px 0 14px;max-width:640px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
+.thumb{width:100%;aspect-ratio:1/1;background:#eceae6;object-fit:cover;display:block;cursor:zoom-in;border:0;padding:0;}
+.body{padding:9px 11px 12px;}
+.nm{font-family:Georgia,serif;font-size:16px;font-weight:600;color:var(--charcoal);}
+.nt{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.fn{font-size:10px;color:#a09a90;margin-top:7px;font-family:ui-monospace,Menlo,monospace;word-break:break-all;}
+a.viewlink{font-size:11px;color:var(--gold);text-decoration:none;font-weight:700;display:inline-block;margin-top:6px;}
+.missing{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;text-align:center;
+         padding:14px;font-size:12px;color:var(--muted);
+         background:repeating-linear-gradient(45deg,#f2efe9,#f2efe9 10px,#eceae6 10px,#eceae6 20px);}
+.tierpill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+          color:var(--gold);border:1px solid var(--gold);border-radius:12px;padding:2px 8px;margin-left:8px;vertical-align:middle;}
+.empty{padding:40px 16px;text-align:center;color:var(--muted);font-size:14px;}
+footer{padding:20px 16px 34px;color:var(--muted);font-size:11px;text-align:center;}
+.tail{height:84vh;}
+.lb{position:fixed;inset:0;background:rgba(18,18,18,.97);display:none;z-index:100;overflow:hidden;touch-action:none;}
+.lb.open{display:block;}
+.stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.lb img{max-width:100%;max-height:100%;transform-origin:center center;will-change:transform;-webkit-user-drag:none;user-select:none;}
+.lbbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+       gap:10px;padding:calc(12px + env(safe-area-inset-top)) 14px 12px;color:#fff;z-index:2;
+       background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,0));}
+.lbbar .t{font-family:Georgia,serif;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lbbar .btns{display:flex;gap:6px;flex:0 0 auto;}
+.lbbar button{background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:9px;font-size:18px;width:40px;height:36px;line-height:1;}
+.hint{position:absolute;bottom:calc(12px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#adadad;font-size:11.5px;z-index:2;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <header>
+    <div class="ttl"><h1>Belvedere Decks</h1><p>Appointment Color Catalog</p></div>
+    <div id="status">Checking…</div>
+  </header>
+  <div class="searchwrap"><input id="q" type="search" placeholder="Search a color, e.g. Havana or grey" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+  <nav id="nav"></nav>
+</div>
+<main id="main"></main>
+<div id="none" class="empty" hidden>No colors match that search.</div>
+<footer>Belvedere Decks LLC · Official manufacturer photography. Color varies with lighting, screen, and finish. Always confirm with a physical sample before ordering.</footer>
+<div class="tail"></div>
+
+<div class="lb" id="lb">
+  <div class="stage" id="stage"><img id="lbimg" alt=""></div>
+  <div class="lbbar"><div class="t" id="lbcap"></div>
+    <div class="btns"><button id="zout" aria-label="Zoom out">&minus;</button>
+    <button id="zin" aria-label="Zoom in">&plus;</button>
+    <button id="zx" aria-label="Close">&times;</button></div></div>
+  <div class="hint">Pinch or double-tap to zoom · drag to pan · tap to close</div>
+</div>
+
+<script src="catalog.js"></script>
+<script>
+(function(){
+var C=self.CATALOG, T=C.T, F=C.F, main=document.getElementById('main'), nav=document.getElementById('nav');
+function el(t,c){var e=document.createElement(t); if(c)e.className=c; return e;}
+
+C.secs.forEach(function(s){
+  var a=el('a'); a.href='#'+s.id; a.textContent=s.t.replace(/^Trex |^TimberTech /,''); a.dataset.id=s.id; nav.appendChild(a);
+  var sec=el('div','section'); sec.id=s.id;
+  var h=el('h2'); h.textContent=s.t;
+  if(s.p){ var pl=el('span','tierpill'); pl.textContent=s.p; h.appendChild(pl); }
+  sec.appendChild(h);
+  var ld=el('p','lead'); ld.textContent=s.l; sec.appendChild(ld);
+  var g=el('div','grid');
+  s.items.forEach(function(it){
+    var c=el('div','card');
+    c.dataset.search=(it.n+' '+it.d+' '+s.t).toLowerCase();
+    if(it.i>=0){
+      var im=el('img','thumb'); im.loading='lazy'; im.decoding='async'; im.src=T[it.i]; im.alt=it.n;
+      im.addEventListener('click',function(){ open(it.i,it.n); });
+      c.appendChild(im);
+    } else {
+      var d=el('div','missing'); d.textContent='No isolated official photo for this finish yet. Use the View official link below.';
+      c.appendChild(d);
+    }
+    var b=el('div','body');
+    var nm=el('div','nm'); nm.textContent=it.n; b.appendChild(nm);
+    var nt=el('div','nt'); nt.textContent=it.d; b.appendChild(nt);
+    var vl=el('a','viewlink'); vl.href=it.u; vl.target='_blank'; vl.rel='noopener'; vl.textContent='View official ›'; b.appendChild(vl);
+    var fn=el('div','fn'); fn.textContent=it.f; b.appendChild(fn);
+    c.appendChild(b); g.appendChild(c);
+  });
+  sec.appendChild(g); main.appendChild(sec);
+});
+
+/* ---- toolbar ---- */
+var bar=document.querySelector('.topbar'), links=[].slice.call(nav.children),
+    sections=[].slice.call(document.querySelectorAll('.section'));
+function barH(){ return bar.getBoundingClientRect().height; }
+links.forEach(function(a){
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    var t=document.getElementById(a.dataset.id); if(!t) return;
+    window.scrollTo({top:Math.max(0,window.pageYOffset+t.getBoundingClientRect().top-barH()-6),behavior:'smooth'});
+  });
+});
+var cur=null;
+function sync(){
+  var line=barH()+20, act=null;
+  sections.forEach(function(s){ if(s.offsetParent!==null && s.getBoundingClientRect().top<=line) act=s; });
+  if(!act) act=sections.find(function(s){return s.offsetParent!==null;});
+  if(act && act.id!==cur){
+    cur=act.id;
+    links.forEach(function(a){ a.classList.toggle('active',a.dataset.id===cur); });
+    var on=links.filter(function(a){return a.classList.contains('active');})[0];
+    if(on){ var nr=nav.getBoundingClientRect(), lr=on.getBoundingClientRect();
+      if(lr.left<nr.left+8||lr.right>nr.right-8) nav.scrollTo({left:nav.scrollLeft+lr.left-nr.left-12,behavior:'smooth'}); }
+  }
+}
+var tick=false;
+addEventListener('scroll',function(){ if(!tick){tick=true;requestAnimationFrame(function(){sync();tick=false;});} },{passive:true});
+addEventListener('resize',sync); sync();
+
+/* ---- search ---- */
+var q=document.getElementById('q'), none=document.getElementById('none');
+q.addEventListener('input',function(){
+  var v=q.value.trim().toLowerCase(), any=false;
+  sections.forEach(function(s){
+    var shown=0;
+    [].forEach.call(s.querySelectorAll('.card'),function(c){
+      var m=!v||c.dataset.search.indexOf(v)>-1;
+      c.style.display=m?'':'none'; if(m)shown++;
+    });
+    s.style.display=shown?'':'none'; if(shown)any=true;
+  });
+  none.hidden=any; cur=null; sync();
+});
+
+/* ---- lightbox with pinch zoom ---- */
+var lb=document.getElementById('lb'), img=document.getElementById('lbimg'),
+    cap=document.getElementById('lbcap'), stage=document.getElementById('stage');
+var sc=1,tx=0,ty=0;
+function apply(){ img.style.transform='translate('+tx+'px,'+ty+'px) scale('+sc+')'; }
+function clamp(){ var r=img.getBoundingClientRect(), s=stage.getBoundingClientRect();
+  var ox=Math.max(0,(r.width-s.width)/2), oy=Math.max(0,(r.height-s.height)/2);
+  tx=Math.min(ox,Math.max(-ox,tx)); ty=Math.min(oy,Math.max(-oy,ty)); }
+function zoomAt(ns,cx,cy){
+  ns=Math.min(6,Math.max(1,ns));
+  var s=stage.getBoundingClientRect(), px=cx-s.left-s.width/2, py=cy-s.top-s.height/2, k=ns/sc;
+  tx=px-(px-tx)*k; ty=py-(py-ty)*k; sc=ns;
+  if(sc<=1.001){sc=1;tx=0;ty=0;} else clamp();
+  apply();
+}
+function open(i,name){ img.src=F[i]; cap.textContent=name; sc=1;tx=0;ty=0;apply();
+  lb.classList.add('open'); document.body.style.overflow='hidden'; }
+function close(){ lb.classList.remove('open'); document.body.style.overflow=''; img.src=''; }
+document.getElementById('zx').addEventListener('click',close);
+document.getElementById('zin').addEventListener('click',function(){var r=stage.getBoundingClientRect();zoomAt(sc*1.6,r.left+r.width/2,r.top+r.height/2);});
+document.getElementById('zout').addEventListener('click',function(){var r=stage.getBoundingClientRect();zoomAt(sc/1.6,r.left+r.width/2,r.top+r.height/2);});
+addEventListener('keydown',function(e){ if(e.key==='Escape'&&lb.classList.contains('open')) close(); });
+var pts={},np=0,d0=0,s0=1,mid={x:0,y:0},pan=false,lx=0,ly=0,moved=false,tap=0;
+function pl(){ var a=[]; for(var k in pts) a.push(pts[k]); return a; }
+stage.addEventListener('pointerdown',function(e){
+  try{stage.setPointerCapture(e.pointerId);}catch(_){}
+  if(!pts[e.pointerId]) np++;
+  pts[e.pointerId]={x:e.clientX,y:e.clientY}; moved=false;
+  if(np===2){ var p=pl(); d0=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y); s0=sc;
+              mid={x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2}; }
+  else if(np===1){ pan=true; lx=e.clientX; ly=e.clientY; }
+});
+stage.addEventListener('pointermove',function(e){
+  if(!pts[e.pointerId]) return;
+  pts[e.pointerId]={x:e.clientX,y:e.clientY};
+  if(np===2){ var p=pl(), d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+    if(d0>0) zoomAt(s0*(d/d0),mid.x,mid.y); moved=true; }
+  else if(pan&&sc>1){ tx+=e.clientX-lx; ty+=e.clientY-ly; lx=e.clientX; ly=e.clientY; clamp(); apply(); moved=true; }
+  else if(pan&&(Math.abs(e.clientX-lx)>8||Math.abs(e.clientY-ly)>8)) moved=true;
+});
+function up(e){
+  if(pts[e.pointerId]){ delete pts[e.pointerId]; np--; }
+  if(np<2) d0=0;
+  if(np<=0){ np=0; pan=false;
+    if(!moved){ var now=Date.now();
+      if(now-tap<300){ zoomAt(sc>1.2?1:2.5,e.clientX,e.clientY); tap=0; }
+      else { tap=now; setTimeout(function(){ if(tap&&Date.now()-tap>=290&&sc<=1.001) close(); },310); } } }
+}
+stage.addEventListener('pointerup',up);
+stage.addEventListener('pointercancel',function(e){ if(pts[e.pointerId]){delete pts[e.pointerId];np--;} if(np<=0){np=0;pan=false;} d0=0; });
+stage.addEventListener('wheel',function(e){ e.preventDefault(); zoomAt(sc*(e.deltaY<0?1.15:1/1.15),e.clientX,e.clientY); },{passive:false});
+stage.addEventListener('dblclick',function(e){ e.preventDefault(); zoomAt(sc>1.2?1:2.5,e.clientX,e.clientY); });
+
+/* ---- offline status ---- */
+var st=document.getElementById('status');
+function setStatus(){
+  if(!('serviceWorker' in navigator)){ st.textContent='Online only'; return; }
+  navigator.serviceWorker.ready.then(function(){ st.textContent='Saved offline'; st.className='ok'; })
+    .catch(function(){ st.textContent='Online only'; });
+}
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js',{scope:'./'}).then(setStatus).catch(function(){ st.textContent='Online only'; });
+} else { st.textContent='Online only'; }
+self.__ready=true;
+})();
+</script>
+</body>
+</html>
