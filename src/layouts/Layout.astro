@@ -48,8 +48,7 @@ const schema = {
   description: brand.tagline,
   areaServed: [
     { '@type': 'State', name: 'Maryland' },
-    ...['Montgomery County MD', 'Potomac MD', 'North Potomac MD', 'Gaithersburg MD',
-        'Bethesda MD', 'Olney MD', 'Boyds MD', 'Clarksburg MD']
+    ...['Baltimore County MD', 'Frederick County MD', 'Howard County MD', 'Montgomery County MD']
       .map((name) => ({ '@type': 'Place', name })),
   ],
   address: { '@type': 'PostalAddress', addressRegion: 'MD', addressCountry: 'US' },
@@ -159,16 +158,10 @@ const schema = {
               <a href="/pricing">Pricing</a> ·
               <a href="/decking">Boards &amp; Colors</a> ·
               <a href="/montgomery-county-deck-permits">Montgomery County Permit Guide</a> ·
-              <a href="/towns/potomac">Potomac</a> ·
-              <a href="/towns/north-potomac-kentlands">Kentlands</a> ·
-              <a href="/towns/bethesda">Bethesda</a> ·
-              <a href="/towns/olney">Olney</a> ·
-              <a href="/towns/boyds">Boyds</a> ·
-              <a href="/towns/clarksburg">Clarksburg</a> ·
               <a href="/estimate">Get a Free Estimate</a>
             </p>
             <p>
-              {brand.legalName} · Serving Maryland, based in Montgomery County ·
+              {brand.legalName} · Serving {brand.serviceArea} ·
               {brand.mhic
                 ? `MHIC #${brand.mhic} · Licensed & Insured`
                 : 'MHIC license pending. Not yet offering home improvement services.'}
