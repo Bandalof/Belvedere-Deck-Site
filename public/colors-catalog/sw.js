@@ -1,4 +1,4 @@
-const V='2026-07-28-2';
+const V='2026-07-28-3';
 const CACHE='bd-catalog-'+V;
 const ASSETS=['./','./index.html','./catalog.js','./manifest.webmanifest',
   './apple-touch-icon.png','./icon-192.png','./icon-512.png','./icon-512-maskable.png'];
