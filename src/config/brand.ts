@@ -8,7 +8,7 @@
 export const brand = {
   launched: false,               // flip to true on Day L only
   name: 'Belvedere Decks',
-  legalName: 'Belvedere Decks LLC',   // pending SDAT amendment
+  legalName: 'Belvedere Decks LLC',
   tagline: 'Composite deck specialists serving Baltimore County, Frederick County, Howard County, and Montgomery County',
   mhic: '',                      // MHIC #_____ - fill on Day L
   phone: '',                     // business line - pending setup
