@@ -1,7 +1,7 @@
-const V='2026-07-28-1';
+const V='2026-07-28-2';
 const CACHE='bd-catalog-'+V;
 const ASSETS=['./','./index.html','./catalog.js','./manifest.webmanifest',
-  './icon-192.png','./icon-512.png','./icon-512-maskable.png'];
+  './apple-touch-icon.png','./icon-192.png','./icon-512.png','./icon-512-maskable.png'];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
