@@ -81,6 +81,18 @@ const schema = {
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    {brand.ga4 && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${brand.ga4}`}></script>
+        <script is:inline define:vars={{ ga4: brand.ga4 }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){ dataLayer.push(arguments); }
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', ga4);
+        </script>
+      </>
+    )}
   </head>
   <body>
     {!brand.launched && (
@@ -158,6 +170,8 @@ const schema = {
               <a href="/pricing">Pricing</a> ·
               <a href="/decking">Boards &amp; Colors</a> ·
               <a href="/montgomery-county-deck-permits">Montgomery County Permit Guide</a> ·
+              <a href="/warranty">Warranty</a> ·
+              <a href="/privacy">Privacy</a> ·
               <a href="/estimate">Get a Free Estimate</a>
             </p>
             <p>

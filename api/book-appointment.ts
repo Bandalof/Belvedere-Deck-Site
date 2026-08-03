@@ -19,10 +19,29 @@ const MAX_FIELD_LENGTH = 1000;
 const MAIL_FROM = process.env.MAIL_FROM || "Belvedere Decks <schedule@belvederedecks.com>";
 const OWNER_EMAIL = process.env.OWNER_EMAIL || "schedule@belvederedecks.com";
 
+// GA4 Measurement Protocol: the server-side booking_completed conversion.
+// Fires only when GA4_MEASUREMENT_ID + GA4_API_SECRET env vars are set; always
+// best-effort - a failed analytics call never affects the booking.
+async function sendBookingConversion(clientId: string, service: string, dateKey: string) {
+  const mid = process.env.GA4_MEASUREMENT_ID;
+  const secret = process.env.GA4_API_SECRET;
+  if (!mid || !secret) return;
+  try {
+    await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${mid}&api_secret=${secret}`, {
+      method: "POST",
+      body: JSON.stringify({
+        client_id: clientId,
+        events: [{ name: "booking_completed", params: { service, booking_date: dateKey } }],
+      }),
+    });
+  } catch { /* analytics is never load-bearing */ }
+}
+
 const VALID_SERVICES = [
   "New deck boards only",
   "New boards + new railings",
   "A brand-new deck",
+  "A repair or something small",
   "Not sure, I'd like an expert to look",
 ];
 
@@ -53,6 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const dateKey = sanitize(req.body?.dateKey);   // YYYY-MM-DD
   const windowId = sanitize(req.body?.windowId); // "08:00"
   const description = sanitize(req.body?.description);
+  const gaClientId = sanitize(req.body?.gaClientId);
 
   if (!name || !email || !phone || !address || !service || !dateKey || !windowId || !description) {
     return res.status(400).json({ error: "All fields are required, including the project details." });
@@ -104,6 +124,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch {
     return res.status(500).json({ error: "Could not save the booking. Please try again or call us." });
   }
+
+  // The booking exists - record the conversion (fire-and-forget).
+  void sendBookingConversion(gaClientId || randomUUID(), service, dateKey);
 
   // Create the real calendar meeting (best-effort; booking is already saved).
   let eventCreated = false;

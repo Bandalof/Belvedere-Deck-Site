@@ -1,0 +1,72 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { brand } from '../config/brand';
+---
+<Layout
+  title="Our 5-Year Workmanship Warranty | Belvedere Decks"
+  description="Every Belvedere Decks project carries a 5-year written workmanship warranty on top of the 25 to 50 year manufacturer board warranties. Here's exactly what it covers and how it works."
+>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">The warranty</p>
+      <h1>Five years on our work. In writing.</h1>
+      <div class="rule"></div>
+      <p class="lead">
+        Two warranties protect every deck we build: the manufacturer's warranty on the
+        boards, and ours on the workmanship. Here is what each one covers, with the
+        conditions stated up front instead of discovered later.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>The 5-year workmanship warranty</h2>
+      <p>
+        We warrant our workmanship for five years from substantial completion of your
+        project. If something we built fails because of how we built it, a board that
+        was fastened wrong, trim that comes loose, a railing connection that loosens
+        under normal use, we come back and correct it at no cost to you. That promise
+        is written into your contract, not implied on a website.
+      </p>
+
+      <h2>The conditions, stated plainly</h2>
+      <p>
+        The warranty applies to the original homeowner at the project address and is
+        non-transferable. It asks one thing of you: maintain the deck per the
+        manufacturer's published care guidelines, which for composite amounts to soap,
+        water, and common sense. It does not cover damage from misuse or neglect,
+        alteration or repair by someone other than us, structural modification, or acts
+        of nature. If a covered problem appears, call or email, we come look, and if our
+        workmanship caused it, we fix it. No claim forms.
+      </p>
+
+      <h2>The manufacturer warranties, registered for you</h2>
+      <p>
+        TimberTech and Trex boards carry manufacturer warranties of 25 to 50 years
+        depending on the line, covering material defects, fading, and staining. Most
+        homeowners never see those warranties because nobody registers them. We register
+        eligible product warranties on your behalf and hand you the documentation at
+        completion, so the coverage actually exists when you need it.
+      </p>
+
+      <h2>Why five years and not a bigger number</h2>
+      <p>
+        Workmanship problems show up early: a bad fastener or a missed flashing detail
+        announces itself within the first few seasons, not in year twelve. Five years
+        covers that window with room to spare, and it is a number we can stand behind
+        for every single project rather than an impressive one we would have to argue
+        about later. The structure itself is protected differently: by building it to
+        code, having the county inspect it, and using boards whose makers back them for
+        decades.
+      </p>
+
+      <p>
+        Questions about coverage on your project?
+        <a href={`mailto:${brand.email}`}> {brand.email}</a>, or ask at the estimate
+        visit and we will point to the exact contract language.
+      </p>
+      <p><a class="btn primary" href="/estimate">Get a Free Estimate</a></p>
+    </div>
+  </section>
+</Layout>

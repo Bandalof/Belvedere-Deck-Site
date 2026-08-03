@@ -38,16 +38,18 @@ import { brand } from '../config/brand';
           <div class="notice">
             <strong>What the visit looks like:</strong> Expect about an hour. We walk
             the deck together and tell you what we find, good and bad. Then we measure
-            and build your exact price on the iPad in front of you, same visit. You get
+            and build your exact price in front of you, same visit. You get
             one clear number for the deck we recommend, and if you want to see what a
             different board line would do to it, we can show you that too. It works best
             when everyone who has a say in the decision can be there.
           </div>
           <div class="notice">
-            <strong>Good to know:</strong> We do not take on small repairs, and our
-            projects start at $6,000. The details you give below are what let us arrive
-            prepared: the right board samples, the right questions, and a realistic
-            range before we ring the doorbell.
+            <strong>Good to know:</strong> No project is too small to ask about. Below a
+            certain size the price stops falling, because a crew day costs the same on a
+            small deck as a big one. But if your deck just needs a repair, call anyway.
+            We'll tell you the number, and you can decide. The details you give below are
+            what let us arrive prepared: the right board samples, the right questions,
+            and a realistic range before we ring the doorbell.
           </div>
         </div>
 
@@ -86,6 +88,7 @@ import { brand } from '../config/brand';
                 <option>New deck boards only</option>
                 <option>New boards + new railings</option>
                 <option>A brand-new deck</option>
+                <option>A repair or something small</option>
                 <option>Not sure, I'd like an expert to look</option>
               </select>
             </div>
@@ -96,6 +99,10 @@ import { brand } from '../config/brand';
             </div>
             <button class="btn primary" type="submit" id="submit-btn" disabled>Pick a date and arrival window above</button>
             <div class="form-msg" id="form-msg"></div>
+            <p class="hint" style="margin-top: 10px;">
+              Your details are used only to schedule and prepare for your visit. Never
+              sold, never added to a marketing list. <a href="/privacy">Privacy policy</a>.
+            </p>
           </form>
         </div>
       </div>
@@ -235,6 +242,9 @@ import { brand } from '../config/brand';
       const windowLabel = selectedWindowLabel;
       const data = new FormData(form);
       try {
+        // GA4 client id from the _ga cookie (if the tag is live) so the server can
+        // attribute the booking_completed conversion to this visitor.
+        const gaClientId = (document.cookie.match(/_ga=GA\d+\.\d+\.(.+?)(?:;|$)/) || [])[1] || null;
         const res = await fetch('/api/book-appointment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -243,10 +253,15 @@ import { brand } from '../config/brand';
             address: data.get('address'), service: data.get('service'),
             description: data.get('description'),
             windowId: selectedWindowId, dateKey: selectedDateKey,
+            gaClientId,
           }),
         });
         const body = await res.json().catch(() => ({}));
         if (res.ok) {
+          // GA4 conversion event (no-op until the tag is configured in brand.ts)
+          (window as any).gtag?.('event', 'booking_completed', {
+            service: data.get('service'), booking_date: selectedDateKey,
+          });
           (booked[selectedDateKey] ||= []).push(selectedWindowId);
           show('ok', `You're booked: ${human}, arrival window ${windowLabel}. Check your email for your confirmation and calendar invite, and remember that we always call before heading your way.`);
           form.reset();

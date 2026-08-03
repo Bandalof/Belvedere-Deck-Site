@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { brand } from '../config/brand';
+---
+<Layout
+  title="Privacy Policy | Belvedere Decks"
+  description="How Belvedere Decks handles your information: what we collect when you book an estimate, how we use it, and what we never do with it."
+  noindex={true}
+>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">Privacy policy</p>
+      <h1>Your information, handled like our own.</h1>
+      <div class="rule"></div>
+      <p class="lead">
+        Effective August 3, 2026. This is written in plain English on purpose. If any
+        of it is unclear, email us and a person will answer.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>What we collect</h2>
+      <p>
+        When you book an estimate or contact us, we collect what you give us: your name,
+        phone number, email, project address, and what you tell us about your deck. When
+        you browse the site, we use Google Analytics to see which pages get read and
+        where visitors come from; that data is aggregated and does not identify you by
+        name.
+      </p>
+
+      <h2>What we use it for</h2>
+      <p>
+        Scheduling and preparing for your visit, preparing your estimate, and running
+        the project if you hire us. Your booking is stored in our scheduling database,
+        your appointment is placed on our business calendar (Microsoft 365), and your
+        confirmation email is delivered through our email provider. Each of those
+        vendors processes your information only to provide that service to us.
+      </p>
+
+      <h2>What we never do</h2>
+      <p>
+        We do not sell your information. We do not share it with marketers. We do not
+        add you to a mailing list because you asked for an estimate. If you tell us no,
+        the conversation ends there. No drip campaigns.
+      </p>
+
+      <h2>Cookies and analytics</h2>
+      <p>
+        The site uses Google Analytics cookies to measure traffic and to tell us when a
+        booking came from an ad, so we know which advertising is worth paying for. You
+        can block cookies in your browser and every part of this site, including
+        booking, still works.
+      </p>
+
+      <h2>Your choices</h2>
+      <p>
+        Want to know what we have about you, correct it, or have it deleted? Email
+        <a href={`mailto:${brand.email}`}> {brand.email}</a> and we will handle it,
+        subject to records we are legally required to keep, like contracts and
+        transaction history.
+      </p>
+
+      <p>
+        {brand.legalName}, Maryland. Questions:
+        <a href={`mailto:${brand.email}`}> {brand.email}</a>.
+      </p>
+    </div>
+  </section>
+</Layout>

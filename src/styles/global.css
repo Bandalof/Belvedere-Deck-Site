@@ -180,6 +180,9 @@ body.nav-open .scrim {
 .section.dark { background: var(--hero-gradient); color: var(--primary-foreground); }
 .section.dark h2, .section.dark h3 { color: var(--primary-foreground); }
 .section.dark a { color: var(--accent); }
+/* dark sections: the link-color override above would tint CTA button text gold-on-gold;
+   keep primary buttons readable (accessibility, flagged in observer review Aug 2026) */
+.section.dark .btn.primary { color: var(--primary-foreground); }
 
 /* page hero: charcoal header band, matching old site's hero treatment */
 .hero { background: var(--hero-gradient); color: var(--primary-foreground); padding: 88px 0 64px; }
@@ -355,6 +358,9 @@ header.topbar .brand-home .brand-word { font-size: 1.05rem; }
   margin-top: 8px; line-height: 1.5;
 }
 .photo-credit { display: block; font-size: 0.75rem; opacity: 0.75; font-style: italic; }
+/* board photo grids (decking page): crop every tile to the same 3:2 shape so
+   mixed-dimension manufacturer photos line up in clean rows */
+.board-grid .site-figure img { aspect-ratio: 3 / 2; object-fit: cover; }
 .badge-figure { display: flex; justify-content: center; }
 .badge-figure img { border: none; box-shadow: none; }
 .hero-photo { margin: 40px 0 0; }
